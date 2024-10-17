@@ -1,1 +1,1 @@
-# olap-web
+# EuclidOLAP Web Console
