@@ -46,10 +46,11 @@ function Home() {
         >
           www.euclidolap.com
         </a>
+        <Link to="/dashboard">
+          {/* <button>进入系统</button> */}
+          <a href='/dashboard'>进入系统</a>
+        </Link>
       </header>
-      <Link to="/dashboard">
-        <button>进入系统</button>
-      </Link>
     </div>
   );
 }
