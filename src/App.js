@@ -8,6 +8,8 @@ import ImportExport from './pages/ImportExport';
 import UserManagement from './pages/UserManagement';
 import Settings from './pages/Settings';
 
+import DimensionModelManagement from './pages/DimensionModelManagement';
+
 // 工作台页面组件
 function Dashboard() {
   const openInNewTab = (url) => {
@@ -23,6 +25,21 @@ function Dashboard() {
       <button onClick={() => openInNewTab('/import-export')}>导入/导出</button>
       <button onClick={() => openInNewTab('/user-management')}>用户管理</button>
       <button onClick={() => openInNewTab('/settings')}>设置</button>
+
+      <h1>功能菜单一级选项</h1>
+      <button onClick={() => openInNewTab('/dimension-model-management')}>【维度模型管理】</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+
+      <h1>功能菜单一级选项</h1>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+
+      <h1>功能菜单一级选项</h1>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+      <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
     </div>
   );
 }
@@ -46,10 +63,11 @@ function Home() {
         >
           www.euclidolap.com
         </a>
+        <Link to="/dashboard">
+          {/* <button>进入系统</button> */}
+          <a href='/dashboard'>进入系统</a>
+        </Link>
       </header>
-      <Link to="/dashboard">
-        <button>进入系统</button>
-      </Link>
     </div>
   );
 }
@@ -66,6 +84,9 @@ function App() {
           <Route path="/import-export" element={<ImportExport />} />
           <Route path="/user-management" element={<UserManagement />} />
           <Route path="/settings" element={<Settings />} />
+
+          <Route path="/dimension-model-management" element={<DimensionModelManagement />} />
+          
         </Routes>
       </div>
     </Router>
