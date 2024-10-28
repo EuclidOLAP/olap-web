@@ -10,6 +10,8 @@ import Settings from './pages/Settings';
 
 import DimensionModelManagement from './pages/DimensionModelManagement';
 
+import Button from '@mui/material/Button';
+
 // 工作台页面组件
 function Dashboard() {
   const openInNewTab = (url) => {
@@ -28,6 +30,10 @@ function Dashboard() {
 
       <h1>功能菜单一级选项</h1>
       <button onClick={() => openInNewTab('/dimension-model-management')}>【维度模型管理】</button>
+      <Button variant="contained" color="primary"
+        onClick={() => openInNewTab('/dimension-model-management')}>
+          &gt;&gt;&gt; Dimension Model Management &lt;&lt;&lt;
+      </Button>
       <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
       <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
 
@@ -40,6 +46,15 @@ function Dashboard() {
       <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
       <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
       <button onClick={() => openInNewTab('/XXXXXXXXXXXX')}>功能菜单二级选项</button>
+
+      <h1>功能菜单一级选项 MUI Button</h1>
+      <Button variant="contained" color="primary">MUI Button 1</Button>
+      <Button color="primary">MUI Button 2</Button>
+      <Button variant="contained">MUI Button 3</Button>
+      <Button>MUI Button 4</Button>
+
+
+
     </div>
   );
 }
@@ -51,22 +66,25 @@ function Home() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <h1>EuclidOLAP Web Console</h1>
-        <h3>EuclidOLAP is a data analysis system with unparalleled multidimensional analysis capabilities.</h3>
+        {/* <h3>EuclidOLAP is a data analysis system with unparalleled multidimensional analysis capabilities.</h3> */}
         {/* <p>
           Edit <code>src/App.js</code> and save to reload.
         </p> */}
-        <a
+        {/* <a
           className="App-link"
           href="http://www.euclidolap.com/"
           target="_blank"
           rel="noopener noreferrer"
         >
           www.euclidolap.com
-        </a>
-        <Link to="/dashboard">
+        </a> */}
+
+        <Link to="/dashboard" className="App-link">
+          进入系统
           {/* <button>进入系统</button> */}
-          <a href='/dashboard'>进入系统</a>
+          {/* <a href='/dashboard'>进入系统</a> */}
         </Link>
+
       </header>
     </div>
   );
