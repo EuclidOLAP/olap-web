@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // 引入 axios 库
 import { List, ListItem, ListItemText } from '@mui/material';
+import config from '../config';  // 导入配置文件
 
 const DimensionModelManagement = () => {
 
@@ -15,7 +16,7 @@ const DimensionModelManagement = () => {
   // 获取所有维度的函数
   const fetchDimensions = async () => {
     try {
-      const response = await axios.get('http://dev.vm:8763/api/dimensions'); // 假设后端运行在该端口
+      const response = await axios.get(`${config.metaServerBaseURL}/api/dimensions`); // 假设后端运行在该端口
       if (response.data.success) {
         setDimensions(response.data.data);  // 更新维度列表
       }
@@ -33,7 +34,7 @@ const DimensionModelManagement = () => {
     console.log(">>>>>>>>>>>>>>>>++++++ Submitted value: ", dimensionName);
     try {
       // 调用 meta-server 的 API
-      const response = await axios.post('http://dev.vm:8763/api/dimension', {
+      const response = await axios.post(`${config.metaServerBaseURL}/api/dimension`, {
         name: dimensionName
       });
       console.log('Dimension created:', response.data);
