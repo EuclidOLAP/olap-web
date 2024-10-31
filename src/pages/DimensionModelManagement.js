@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // 引入 axios 库
 import { List, ListItem, ListItemText } from '@mui/material';
+import { Dialog, DialogTitle, DialogContent } from '@mui/material';
 import config from '../config';  // 导入配置文件
 
 const DimensionModelManagement = () => {
 
   const [dimensionName, setDimensionName] = useState('');
-
   const [dimensions, setDimensions] = useState([]);  // 用于存储维度数据
+
+  const [selectedDimension, setSelectedDimension] = useState(null);     // 存储点击维度列表时选中的维度实例
+  const [dimensionMembersTree, setDimensionMembersTree] = useState([]); // 一个维度可以有多个RootMember，因为一个维度可能有多个Hierarchy
+  const [dialogOpen, setDialogOpen] = useState(false);                  // 用于打开 Dialog 显示维度成员树
 
   const handleDimensionNameChange = (event) => {
     setDimensionName(event.target.value);
@@ -47,6 +51,45 @@ const DimensionModelManagement = () => {
     }
   };
 
+
+  // 显示维度成员树的函数
+  const fetchDimensionMembers = async (dimension_gid) => {
+    try {
+      const response = await axios.get(`${config.metaServerBaseURL}/api/dimension/${dimension_gid}/members`);
+      if (response.data.success) {
+
+        const memberMap = {};
+        response.data.members.forEach((member) => { member.children = []; memberMap[member.gid] = member; });
+        const root_members_tree = [];
+        response.data.members.forEach((member) => {
+          if (member.parentGid !== 0) { // member is not a Root.
+            memberMap[member.parentGid].children.push(member);
+          } else { // member is a Root.
+            root_members_tree.push(member);
+          }
+        });
+
+        setDimensionMembersTree(root_members_tree);
+        setDialogOpen(true);  // 打开 Dialog
+      }
+    } catch (error) {
+      console.error('Error fetching dimension members:', error);
+    }
+  };
+
+  // 递归渲染成员树
+  const renderMemberTree = (members_tree) => {
+    return members_tree.map((member) => (
+      <li key={member.gid}>
+        {member.name}
+        {member.children && member.children.length > 0 && (
+          <ul>{renderMemberTree(member.children)}</ul>
+        )}
+      </li>
+    ));
+  };
+
+
   return (
     <div>
       <h1>Dimension Model Management</h1>
@@ -62,12 +105,22 @@ const DimensionModelManagement = () => {
         {/* 维度列表 */}
         <List>
           {dimensions.map((dimension) => (
-            <ListItem key={dimension.gid}>
+            <ListItem key={dimension.gid} onClick={() => { fetchDimensionMembers(dimension.gid); setSelectedDimension(dimension); }}>
               <ListItemText primary={dimension.name} />
             </ListItem>
           ))}
         </List>
       </div>
+
+
+      {/* 维度成员 Dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="lg">
+        <DialogTitle>{`===@>>> ${selectedDimension ? selectedDimension.name : '维度成员'} <<<@===`}</DialogTitle>
+        <DialogContent>
+          <ul>{renderMemberTree(dimensionMembersTree)}</ul>
+        </DialogContent>
+      </Dialog>
+
 
     </div>
   );
