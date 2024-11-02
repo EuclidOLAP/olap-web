@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // 引入 axios 库
 import { List, ListItem, ListItemText } from '@mui/material';
 import { Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { Button, TextField, DialogActions } from '@mui/material';
 import config from '../config';  // 导入配置文件
 
 const DimensionModelManagement = () => {
@@ -12,6 +13,10 @@ const DimensionModelManagement = () => {
   const [selectedDimension, setSelectedDimension] = useState(null);     // 存储点击维度列表时选中的维度实例
   const [dimensionMembersTree, setDimensionMembersTree] = useState([]); // 一个维度可以有多个RootMember，因为一个维度可能有多个Hierarchy
   const [dialogOpen, setDialogOpen] = useState(false);                  // 用于打开 Dialog 显示维度成员树
+
+  const [addMemberDialogOpen, setAddMemberDialogOpen] = useState(false); // 控制添加子成员对话框
+  const [newChildMemberName, setNewChildMemberName] = useState(''); // 新建的子级成员名称
+  const [parentMemberId, setParentMemberId] = useState(null);       // 新建的子级成员的父GID
 
   const handleDimensionNameChange = (event) => {
     setDimensionName(event.target.value);
@@ -77,11 +82,35 @@ const DimensionModelManagement = () => {
     }
   };
 
+  // 添加子成员
+  const createChildMember = async () => {
+    try {
+      const response = await axios.post(`${config.metaServerBaseURL}/api/child-member`, {
+        newChildMemberName: newChildMemberName,
+        parentGid: parentMemberId
+      });
+
+      setAddMemberDialogOpen(false);
+      fetchDimensionMembers(selectedDimension.gid); // 刷新维度成员树
+      // setNewChildMemberName('');
+      console.log('Child member created:', response.data);
+    } catch (error) {
+      console.error('Error adding child member:', error);
+    }
+  };
+
+  // 打开添加子成员对话框
+  const handleOpenCreateChildMemberDialog = (parent_gid) => {
+    setParentMemberId(parent_gid);
+    setAddMemberDialogOpen(true);
+  };
+
   // 递归渲染成员树
   const renderMemberTree = (members_tree) => {
     return members_tree.map((member) => (
       <li key={member.gid}>
         {member.name}
+        <Button size="small" onClick={() => handleOpenCreateChildMemberDialog(member.gid)}> [ + ] </Button>
         {member.children && member.children.length > 0 && (
           <ul>{renderMemberTree(member.children)}</ul>
         )}
@@ -121,6 +150,24 @@ const DimensionModelManagement = () => {
         </DialogContent>
       </Dialog>
 
+      {/* 添加子成员 Dialog */}
+      <Dialog open={addMemberDialogOpen} onClose={() => {setAddMemberDialogOpen(false); setNewChildMemberName('');} } fullWidth maxWidth="sm">
+        <DialogTitle>Create a Child Member</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="child member name"
+            fullWidth
+            value={newChildMemberName}
+            onChange={(e) => setNewChildMemberName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => {setAddMemberDialogOpen(false); setNewChildMemberName('');}}>Cancel</Button>
+          <Button onClick={() => {createChildMember();setNewChildMemberName('');}}>Confirm</Button>
+        </DialogActions>
+      </Dialog>
 
     </div>
   );
