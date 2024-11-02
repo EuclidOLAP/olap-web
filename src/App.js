@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import logo from './logo.svg';
 import './App.css';
 
-import Workbench from './pages/Workbench';
+import Workbench0 from './pages/Workbench0';
 
 import Reports from './pages/Reports';
 import DataAnalysis from './pages/DataAnalysis';
@@ -82,7 +82,7 @@ function Home() {
           www.euclidolap.com
         </a> */}
 
-        <Link to="/workbench" className="App-link">进入Workbench</Link>
+        <Link to="/workbench0" className="App-link">进入Workbench 0</Link>
 
       </header>
     </div>
@@ -96,7 +96,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
 
-          <Route path="/workbench" element={<Workbench />} />
+          <Route path="/workbench0" element={<Workbench0 />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<Reports />} />
