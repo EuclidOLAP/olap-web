@@ -4,6 +4,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import Workbench0 from './pages/Workbench0';
+import Workbench from './pages/Workbench';
 
 import Reports from './pages/Reports';
 import DataAnalysis from './pages/DataAnalysis';
@@ -83,6 +84,7 @@ function Home() {
         </a> */}
 
         <Link to="/workbench0" className="App-link">进入Workbench 0</Link>
+        <Link to="/workbench" className="App-link">进入Workbench</Link>
 
       </header>
     </div>
@@ -97,6 +99,7 @@ function App() {
           <Route path="/" element={<Home />} />
 
           <Route path="/workbench0" element={<Workbench0 />} />
+          <Route path="/workbench" element={<Workbench />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/reports" element={<Reports />} />
