@@ -9,6 +9,7 @@ function Workbench() {
       {/* 第一部分：顶部菜单栏 */}
       <Box component="header"
         sx={{
+          color: "white",
           height: "64px",
           width: "100%",
           backgroundColor: "primary.main"
@@ -31,6 +32,7 @@ function Workbench() {
       {/* 第三部分：底部辅助信息 */}
       <Box component="footer"
         sx={{
+          color: "white",
           height: "32px",
           width: "100%",
           backgroundColor: "primary.dark"
