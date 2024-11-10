@@ -47,6 +47,7 @@ export default function DataTable() {
     const [open, setOpen] = useState(false);  // 控制 Dialog 显示状态
     const [dimensionName, setDimensionName] = useState('');  // 存储新维度名
 
+    const [selectedDimensionName, setSelectedDimensionName] = useState('');  // 存储选中的维度Name
     const [selectedDimensionGid, setSelectedDimensionGid] = useState(null);  // 存储选中的维度gid
     const [dimensionNembersDialogOpen, setDimensionNembersDialogOpen] = useState(false);
 
@@ -94,6 +95,7 @@ export default function DataTable() {
     // 处理 name 字段点击事件，设置 selectedGid 并打开 Dialog of Dimension Members
     const handleNameClick = (row) => {
         setSelectedDimensionGid(row.gid);
+        setSelectedDimensionName(row.name);
         setDimensionNembersDialogOpen(true);
     };
 
@@ -175,9 +177,8 @@ export default function DataTable() {
                     maxWidth: 'none',    // Disable maxWidth restriction
                 }
             }}>
-                <DialogTitle>Component View</DialogTitle>
+                <DialogTitle>Members of Dimension instence: {selectedDimensionName}</DialogTitle>
                 <DialogContent>
-                    dimensionGid ::: {selectedDimensionGid}
                     <Members dimensionGid={selectedDimensionGid} />
                 </DialogContent>
             </Dialog>

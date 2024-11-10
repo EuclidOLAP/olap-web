@@ -70,7 +70,7 @@ const CustomTreeItem = styled(TreeItem)({
 export default function CustomIcons(props) {
     return (
         <Box sx={{ minHeight: 352, minWidth: 250 }}>
-            <h1>Dimension GID: {props.dimensionGid}</h1>
+            {/* <h1>Dimension GID: {props.dimensionGid}</h1> */}
             <RichTreeView
                 // defaultExpandedItems={['grid']}
                 slots={{
