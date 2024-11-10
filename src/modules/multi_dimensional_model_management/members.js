@@ -1,5 +1,7 @@
 // 展现一个维度下的成员树（包括Hierarchies和RootMembers）
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // 引入 axios 库
+import config from '../../config';  // 导入配置文件
 import Box from '@mui/material/Box';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox';
@@ -9,42 +11,6 @@ import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import FiberManualRecordTwoToneIcon from '@mui/icons-material/FiberManualRecordTwoTone';
 
-const MUI_X_PRODUCTS = [
-    {
-        id: 'grid',
-        label: 'Data Grid',
-        children: [
-            { id: 'grid-community', label: '@mui/x-data-grid' },
-            { id: 'grid-pro', label: '@mui/x-data-grid-pro' },
-            {
-                id: 'grid-premium', label: '@mui/x-data-grid-premium', children: [
-                    { id: '11grid-community', label: '11@mui/x-data-grid' },
-                    { id: '22grid-pro', label: '22@mui/x-data-grid-pro' },
-                    { id: '33grid-premium', label: '33@mui/x-data-grid-premium' },
-                ]
-            },
-        ],
-    },
-    {
-        id: 'pickers',
-        label: 'Date and Time Pickers',
-        children: [
-            { id: 'pickers-community', label: '@mui/x-date-pickers' },
-            { id: 'pickers-pro', label: '@mui/x-date-pickers-pro' },
-        ],
-    },
-    {
-        id: 'charts',
-        label: 'Charts',
-        children: [{ id: 'charts-community', label: '@mui/x-charts' }],
-    },
-    {
-        id: 'tree-view',
-        label: 'Tree View',
-        children: [{ id: 'tree-view-community', label: '@mui/x-tree-view' }],
-    },
-];
-
 const CustomTreeItem = styled(TreeItem)({
     [`& .${treeItemClasses.iconContainer}`]: {
         '& .close': {
@@ -53,24 +19,81 @@ const CustomTreeItem = styled(TreeItem)({
     },
 });
 
-// function CloseSquare(props) {
-//   return (
-//     <SvgIcon
-//       className="close"
-//       fontSize="inherit"
-//       style={{ width: 14, height: 14 }}
-//       {...props}
-//     >
-//       {/* tslint:disable-next-line: max-line-length */}
-//       <path d="M17.485 17.512q-.281.281-.682.281t-.696-.268l-4.12-4.147-4.12 4.147q-.294.268-.696.268t-.682-.281-.281-.682.294-.669l4.12-4.147-4.12-4.147q-.294-.268-.294-.669t.281-.682.682-.281.696 .268l4.12 4.147 4.12-4.147q.294-.268.696-.268t.682.281 .281.669-.294.682l-4.12 4.147 4.12 4.147q.294.268 .294.669t-.281.682zM22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0z" />
-//     </SvgIcon>
-//   );
-// }
+const DimensionMembers = (props) => {
 
-export default function CustomIcons(props) {
+    const [membersTree, setMembersTree] = useState([]);
+
+    const load_members_by_hierarchy = async (hierarchy) => {
+        try {
+            const response = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
+            if (response.data.success) {
+                return response.data.members;
+            }
+        } catch (error) {
+            console.error('Error fetching in Fn:DimensionMembers()', error);
+        }
+        return [];
+    };
+
+
+    // 初始化时加载数据
+    useEffect(() => {
+
+        // 获取维度所有的hierarchies
+        const load_hierarchies = async () => {
+            try {
+                const response = await axios.get(`${config.metaServerBaseURL}/api/dimension/${props.dimensionGid}/hierarchies`);
+                if (response.data.success) {
+                    // console.log("response.data.hierarchies >>>>>>>>>>>>>>>>>", response.data.hierarchies);
+                    const hierarchies = response.data.hierarchies;
+
+                    const tree = [];
+
+                    for (let hierarchy of hierarchies) {
+
+                        hierarchy.id = '' + hierarchy.gid;
+                        hierarchy.label = hierarchy.name;
+                        hierarchy.children = [];
+
+                        let members = await load_members_by_hierarchy(hierarchy);
+
+                        let tempMapping = {};
+
+                        for (let m of members) {
+                            m.id = '' + m.gid;
+                            m.label = m.name;
+                            m.children = [];
+
+                            tempMapping[m.id] = m;
+                        }
+
+                        for (let m of members) {
+                            if (m.parentGid > 0) { // 非根节点
+                                let parent = tempMapping[m.parentGid];
+                                parent.children.push(m);
+                            } else { // 根节点
+                                hierarchy.children.push(m);
+                            }
+                        }
+
+                        tree.push(hierarchy);
+                        console.log("@@@members >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", members);
+                    }
+
+                    setMembersTree(tree);
+                }
+            } catch (error) {
+                console.error('Error fetching in Fn:load_hierarchies()', error);
+            }
+        };
+
+        load_hierarchies();
+    }, [props.dimensionGid]);
+
+
     return (
         <Box sx={{ minHeight: 352, minWidth: 250 }}>
-            {/* <h1>Dimension GID: {props.dimensionGid}</h1> */}
+            Dimension GID is {props.dimensionGid}
             <RichTreeView
                 // defaultExpandedItems={['grid']}
                 slots={{
@@ -79,8 +102,10 @@ export default function CustomIcons(props) {
                     endIcon: FiberManualRecordTwoToneIcon,
                     item: CustomTreeItem,
                 }}
-                items={MUI_X_PRODUCTS}
+                items={membersTree}
             />
         </Box>
     );
-}
+};
+
+export default DimensionMembers;
