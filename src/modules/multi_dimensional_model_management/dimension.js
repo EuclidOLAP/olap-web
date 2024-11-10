@@ -11,28 +11,44 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
 import AddIcon from '@mui/icons-material/Add';
-
-const columns = [
-    { field: 'gid', headerName: 'gid', width: 200 },
-    // { field: 'id', headerName: 'id', width: 120 },
-    // { field: 'code', headerName: 'code', width: 80 },
-    { field: 'name', headerName: 'name', width: 200 },
-    // { field: 'alias', headerName: 'alias', width: 80 },
-    // { field: 'display', headerName: 'display', width: 120 },
-    { field: 'type', headerName: 'type', width: 240 },
-    { field: 'createdAt', headerName: 'createdAt', width: 170 },
-    { field: 'updatedAt', headerName: 'updatedAt', width: 170 },
-    // { field: 'created_by', headerName: 'created_by', width: 120 },
-    // { field: 'updated_by', headerName: 'updated_by', width: 120 },
-    // { field: 'description', headerName: 'description', width: 300 },
-    // { field: 'defaultHierarchyGid', headerName: 'defaultHierarchyGid', width: 120 },
-];
+import Link from '@mui/material/Link';
+import Members from './members';
 
 export default function DataTable() {
+
+    const columns = [
+        { field: 'gid', headerName: 'gid', width: 200 },
+        // { field: 'id', headerName: 'id', width: 120 },
+        // { field: 'code', headerName: 'code', width: 80 },
+        {
+            field: 'name', headerName: 'name', width: 200,
+            renderCell: (params) => (
+                <Link
+                    component="button"
+                    variant="body2"
+                    onClick={() => handleNameClick(params.row)}
+                >
+                    {params.value}
+                </Link>
+            )
+        },
+        // { field: 'alias', headerName: 'alias', width: 80 },
+        // { field: 'display', headerName: 'display', width: 120 },
+        { field: 'type', headerName: 'type', width: 240 },
+        { field: 'createdAt', headerName: 'createdAt', width: 170 },
+        { field: 'updatedAt', headerName: 'updatedAt', width: 170 },
+        // { field: 'created_by', headerName: 'created_by', width: 120 },
+        // { field: 'updated_by', headerName: 'updated_by', width: 120 },
+        // { field: 'description', headerName: 'description', width: 300 },
+        // { field: 'defaultHierarchyGid', headerName: 'defaultHierarchyGid', width: 120 },
+    ];
 
     const [dimensions, setDimensions] = useState([]);
     const [open, setOpen] = useState(false);  // 控制 Dialog 显示状态
     const [dimensionName, setDimensionName] = useState('');  // 存储新维度名
+
+    const [selectedDimensionGid, setSelectedDimensionGid] = useState(null);  // 存储选中的维度gid
+    const [dimensionNembersDialogOpen, setDimensionNembersDialogOpen] = useState(false);
 
     // 获取所有维度的函数
     const fetchDimensions = async () => {
@@ -55,14 +71,12 @@ export default function DataTable() {
     useEffect(() => {
         fetchDimensions();
 
-
         // 手动移除滚动条元素的 aria-hidden 属性
         const removeAriaHidden = () => {
             const scrollbars = document.querySelectorAll('.MuiDataGrid-scrollbar');
             scrollbars.forEach(scrollbar => scrollbar.removeAttribute('aria-hidden'));
         };
         removeAriaHidden();
-
 
     }, []);
 
@@ -75,6 +89,12 @@ export default function DataTable() {
     const handleClose = () => {
         setOpen(false);
         setDimensionName('');  // 清空输入框内容
+    };
+
+    // 处理 name 字段点击事件，设置 selectedGid 并打开 Dialog of Dimension Members
+    const handleNameClick = (row) => {
+        setSelectedDimensionGid(row.gid);
+        setDimensionNembersDialogOpen(true);
     };
 
     // 新建维度的提交操作
@@ -142,6 +162,24 @@ export default function DataTable() {
                         Confirm
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/* 维度成员的 Dialog */}
+            <Dialog open={dimensionNembersDialogOpen} onClose={() => {
+                setDimensionNembersDialogOpen(false);
+                setSelectedDimensionGid(null);
+            }} maxWidth="md" fullWidth sx={{
+                '& .MuiDialog-paper': {
+                    width: '60vw',       // 90% of viewport width
+                    height: '90vh',      // 90% of viewport height
+                    maxWidth: 'none',    // Disable maxWidth restriction
+                }
+            }}>
+                <DialogTitle>Component View</DialogTitle>
+                <DialogContent>
+                    dimensionGid ::: {selectedDimensionGid}
+                    <Members dimensionGid={selectedDimensionGid} />
+                </DialogContent>
             </Dialog>
         </Paper>
     );
