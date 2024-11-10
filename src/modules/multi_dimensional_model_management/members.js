@@ -10,6 +10,7 @@ import { styled } from '@mui/material/styles';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import FiberManualRecordTwoToneIcon from '@mui/icons-material/FiberManualRecordTwoTone';
+import { useCallback } from 'react';
 
 const CustomTreeItem = styled(TreeItem)({
     [`& .${treeItemClasses.iconContainer}`]: {
@@ -35,60 +36,58 @@ const DimensionMembers = (props) => {
         return [];
     };
 
+    // 获取维度所有的hierarchies
+    const load_hierarchies = useCallback(async () => {
+        try {
+            const response = await axios.get(`${config.metaServerBaseURL}/api/dimension/${props.dimensionGid}/hierarchies`);
+            if (response.data.success) {
+                // console.log("response.data.hierarchies >>>>>>>>>>>>>>>>>", response.data.hierarchies);
+                const hierarchies = response.data.hierarchies;
+
+                const tree = [];
+
+                for (let hierarchy of hierarchies) {
+
+                    hierarchy.id = '' + hierarchy.gid;
+                    hierarchy.label = hierarchy.name;
+                    hierarchy.children = [];
+
+                    let members = await load_members_by_hierarchy(hierarchy);
+
+                    let tempMapping = {};
+
+                    for (let m of members) {
+                        m.id = '' + m.gid;
+                        m.label = m.name;
+                        m.children = [];
+
+                        tempMapping[m.id] = m;
+                    }
+
+                    for (let m of members) {
+                        if (m.parentGid > 0) { // 非根节点
+                            let parent = tempMapping[m.parentGid];
+                            parent.children.push(m);
+                        } else { // 根节点
+                            hierarchy.children.push(m);
+                        }
+                    }
+
+                    tree.push(hierarchy);
+                    console.log("@@@members >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", members);
+                }
+
+                setMembersTree(tree);
+            }
+        } catch (error) {
+            console.error('Error fetching in Fn:load_hierarchies()', error);
+        }
+    }, [props.dimensionGid]);
 
     // 初始化时加载数据
     useEffect(() => {
-
-        // 获取维度所有的hierarchies
-        const load_hierarchies = async () => {
-            try {
-                const response = await axios.get(`${config.metaServerBaseURL}/api/dimension/${props.dimensionGid}/hierarchies`);
-                if (response.data.success) {
-                    // console.log("response.data.hierarchies >>>>>>>>>>>>>>>>>", response.data.hierarchies);
-                    const hierarchies = response.data.hierarchies;
-
-                    const tree = [];
-
-                    for (let hierarchy of hierarchies) {
-
-                        hierarchy.id = '' + hierarchy.gid;
-                        hierarchy.label = hierarchy.name;
-                        hierarchy.children = [];
-
-                        let members = await load_members_by_hierarchy(hierarchy);
-
-                        let tempMapping = {};
-
-                        for (let m of members) {
-                            m.id = '' + m.gid;
-                            m.label = m.name;
-                            m.children = [];
-
-                            tempMapping[m.id] = m;
-                        }
-
-                        for (let m of members) {
-                            if (m.parentGid > 0) { // 非根节点
-                                let parent = tempMapping[m.parentGid];
-                                parent.children.push(m);
-                            } else { // 根节点
-                                hierarchy.children.push(m);
-                            }
-                        }
-
-                        tree.push(hierarchy);
-                        console.log("@@@members >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", members);
-                    }
-
-                    setMembersTree(tree);
-                }
-            } catch (error) {
-                console.error('Error fetching in Fn:load_hierarchies()', error);
-            }
-        };
-
         load_hierarchies();
-    }, [props.dimensionGid]);
+    }, [load_hierarchies]);
 
 
     return (
