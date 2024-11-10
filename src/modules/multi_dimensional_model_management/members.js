@@ -93,7 +93,7 @@ const DimensionMembers = (props) => {
 
     return (
         <Box sx={{ minHeight: 352, minWidth: 250 }}>
-            Dimension GID is {props.dimensionGid}
+            {/* Dimension GID is {props.dimensionGid} */}
             <RichTreeView
                 // defaultExpandedItems={['grid']}
                 slots={{
