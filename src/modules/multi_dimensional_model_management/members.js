@@ -12,6 +12,13 @@ import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import FiberManualRecordTwoToneIcon from '@mui/icons-material/FiberManualRecordTwoTone';
 import { useCallback } from 'react';
 
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
+
 const CustomTreeItem = styled(TreeItem)({
     [`& .${treeItemClasses.iconContainer}`]: {
         '& .close': {
@@ -23,6 +30,9 @@ const CustomTreeItem = styled(TreeItem)({
 const DimensionMembers = (props) => {
 
     const [membersTree, setMembersTree] = useState([]);
+    const [parentMemberGid, setParentMemberGid] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);  // 控制Dialog的显示
+    const [newMemberName, setNewMemberName] = useState('');  // 记录新成员的名称
 
     const load_members_by_hierarchy = async (hierarchy) => {
         try {
@@ -89,9 +99,62 @@ const DimensionMembers = (props) => {
         load_hierarchies();
     }, [load_hierarchies]);
 
+    // 处理TreeItem选择事件
+    const handleSelectMember = (event, parent_member_gid_str) => {
+        // console.log("handleSelectMember $$$$$$$$$$$$$$$>>>>>>>>>>>>>>>", event, parent_member_gid_str);
+        setParentMemberGid(parent_member_gid_str);
+    };
+
+    // 打开Dialog
+    const handleOpenDialog = () => {
+        // console.log("handleOpenDialog $$$$$$$$$$$$$$$> ooooooooo (((((((((( ))))))))))))))))))", parentMemberGid);
+        setOpenDialog(true);
+    };
+
+    // 关闭Dialog
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setNewMemberName('');
+    };
+
+    // 提交创建新成员
+    const handleCreateMember = async () => {
+        // console.log("parentMemberGid, newMemberName [][] ", parentMemberGid, newMemberName);
+        // if (!selectedMember || !newMemberName.trim()) return;
+        if (!newMemberName.trim()) {
+            return;
+        }
+
+        try {
+            await axios.post(`${config.metaServerBaseURL}/api/child-member`, {
+                newChildMemberName: newMemberName,
+                parentGid: parentMemberGid,
+            });
+
+            // 成功创建后刷新成员树
+            setNewMemberName('');
+            setParentMemberGid('');
+            handleCloseDialog();
+            // 调用 load_hierarchies 来刷新树
+            load_hierarchies();
+        } catch (error) {
+            console.error('Error creating new member', error);
+        }
+    };
 
     return (
         <Box sx={{ minHeight: 352, minWidth: 250 }}>
+
+            {/* 创建按钮 */}
+            <Button 
+                variant="contained" 
+                onClick={handleOpenDialog} 
+                disabled={parentMemberGid.charAt(0) !== '3'}  // 只有选中成员时可用
+                sx={{ marginBottom: 2 }}
+            >
+                创建
+            </Button>
+
             {/* Dimension GID is {props.dimensionGid} */}
             <RichTreeView
                 // defaultExpandedItems={['grid']}
@@ -102,7 +165,27 @@ const DimensionMembers = (props) => {
                     item: CustomTreeItem,
                 }}
                 items={membersTree}
+                onItemClick={handleSelectMember}  // 监听节点选择
             />
+
+            {/* 创建新成员的Dialog */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>创建子级成员</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="子级成员名称"
+                        fullWidth
+                        value={newMemberName}
+                        onChange={(e) => setNewMemberName(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog}>取消</Button>
+                    <Button onClick={handleCreateMember} variant="contained">创建</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
