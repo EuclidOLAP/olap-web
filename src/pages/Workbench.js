@@ -20,7 +20,7 @@ import MetricsManagement from '../modules/metrics_management';
 import AdHoc from '../modules/multi_dimensional_analysis/ad_hoc';
 import DataVisualization from '../modules/multi_dimensional_analysis/data_visualization';
 import Dimension from '../modules/multi_dimensional_model_management/dimension';
-import Cube from '../modules/multi_dimensional_model_management/cube';
+import CubeDimensionMatrix from '../modules/multi_dimensional_model_management/CubeDimensionMatrix';
 
 const NAVIGATION = [
     {
@@ -39,8 +39,8 @@ const NAVIGATION = [
                 icon: <CallMadeIcon />,
             },
             {
-                segment: 'cube',
-                title: '业务模型',
+                segment: 'cube_dimension_matrix',
+                title: '模型概览',
                 icon: <ViewInArIcon />,
             },
         ],
@@ -109,7 +109,8 @@ DemoPageContent.propTypes = {
 function DashboardLayoutBasic(props) {
     const { window } = props;
 
-    const router = useDemoRouter('/home');
+    // const router = useDemoRouter('/home');
+    const router = useDemoRouter('/multi_dimensional_model_management/cube_dimension_matrix');
 
     // Remove this const when copying and pasting into your project.
     const demoWindow = window !== undefined ? window() : undefined;
@@ -134,8 +135,8 @@ function DashboardLayoutBasic(props) {
                             return <Home />;
                         case '/multi_dimensional_model_management/dimension':
                             return <Dimension />;
-                        case '/multi_dimensional_model_management/cube':
-                            return <Cube />;
+                        case '/multi_dimensional_model_management/cube_dimension_matrix':
+                            return <CubeDimensionMatrix />;
                         case '/multi_dimensional_analysis/ad_hoc':
                             return <AdHoc />;
                         case '/multi_dimensional_analysis/data_visualization':

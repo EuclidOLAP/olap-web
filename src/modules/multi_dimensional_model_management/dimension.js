@@ -60,7 +60,7 @@ export default function DataTable() {
                 dim_arr.forEach(dim => {
                     dim.id = dim.gid;
                 });
-                console.log("::>", dim_arr);
+                // console.log("::>", dim_arr);
                 setDimensions(dim_arr);
             }
         } catch (error) {
