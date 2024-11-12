@@ -61,7 +61,7 @@ export default function DataTable() {
                     dim.id = dim.gid;
                 });
                 // console.log("::>", dim_arr);
-                setDimensions(dim_arr);
+                setDimensions(dim_arr.filter((d) => d.type === 'NOT_MEASURE_DIMENSION'));
             }
         } catch (error) {
             console.error('Error fetching dimensions:', error);

@@ -81,6 +81,8 @@ const CubeDimensionMatrix = () => {
     const load_data = async () => {
         let _dimensions = await axios.get(`${config.metaServerBaseURL}/api/dimensions`);
         _dimensions = _dimensions.data.data;
+        _dimensions = _dimensions.filter((d) => d.type === 'NOT_MEASURE_DIMENSION')
+
         setDimensions(_dimensions);
 
         let _cubes = await axios.get(`${config.metaServerBaseURL}/api/cubes`);
@@ -121,7 +123,7 @@ const CubeDimensionMatrix = () => {
 
         setData(_data);
         setRowHeaders(_cubes.map((cube) => cube.name));
-        setColumnHeaders(_dimensions.map((dimension) => dimension.name));
+        setColumnHeaders(_dimensions.filter((d) => d.type === 'NOT_MEASURE_DIMENSION').map((dimension) => dimension.name));
     };
 
     useEffect(() => {
