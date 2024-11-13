@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import RowingIcon from '@mui/icons-material/Rowing';
-import ColumnIcon from '@mui/icons-material/ViewColumn';
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import CallMadeIcon from '@mui/icons-material/CallMade';
 import AddIcon from '@mui/icons-material/Add';
 import axios from 'axios';
 import config from '../../config';
@@ -26,7 +26,7 @@ const ArrayTable = ({ data, rowHeaders, columnHeaders }) => {
                                     fontSize: '1rem'
                                 }}
                             >
-                                <ColumnIcon fontSize="small" style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                                <CallMadeIcon fontSize="small" style={{ verticalAlign: 'middle', marginRight: 4 }} />
                                 {colHeader}
                             </TableCell>
                         ))}
@@ -47,7 +47,7 @@ const ArrayTable = ({ data, rowHeaders, columnHeaders }) => {
                                     fontSize: '1rem'
                                 }}
                             >
-                                <RowingIcon fontSize="small" style={{ verticalAlign: 'middle', marginRight: 4 }} />
+                                <ViewInArIcon fontSize="small" style={{ verticalAlign: 'middle', marginRight: 4 }} />
                                 {rowHeaders[rowIndex]}
                             </TableCell>
                             {/* 渲染数据单元格 */}
