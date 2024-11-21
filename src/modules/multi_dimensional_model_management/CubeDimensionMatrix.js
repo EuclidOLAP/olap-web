@@ -37,7 +37,7 @@ const ArrayTable = ({ data, rowHeaders, columnHeaders }) => {
                         <TableRow key={`row-${rowIndex}`}>
                             {/* 渲染行标题，添加图标 */}
                             <TableCell
-                                align="center"
+                                align="left"
                                 component="th"
                                 scope="row"
                                 sx={{
