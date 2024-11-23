@@ -1,5 +1,7 @@
-export default function Home() {
+const AdHoc = () => {
     return (
-        <h1>___ ad_hoc ___</h1>
+        <h1>___ AD_hoc ___</h1>
     );
 };
+
+export default AdHoc;
