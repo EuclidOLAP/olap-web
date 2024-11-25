@@ -4,6 +4,7 @@ import logo from './logo.svg';
 import './App.css';
 
 import Workbench from './pages/Workbench';
+import AdHocTabs from './modules/multi_dimensional_analysis/ad_hoc_tabs';
 
 // 首页组件
 function Home() {
@@ -29,6 +30,8 @@ function App() {
 
           {/* <Route path="/workbench0" element={<Workbench0 />} /> */}
           <Route path="/workbench" element={<Workbench />} />
+
+          <Route path="/ad_hoc_tabs" element={<AdHocTabs />} />
 
         </Routes>
       </div>
