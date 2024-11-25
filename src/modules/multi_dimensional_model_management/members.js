@@ -1,5 +1,7 @@
 // 展现一个维度下的成员树（包括Hierarchies和RootMembers）
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // 引入 axios 库
+import config from '../../config';  // 导入配置文件
 import Box from '@mui/material/Box';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import IndeterminateCheckBoxIcon from '@mui/icons-material/IndeterminateCheckBox';
@@ -8,42 +10,14 @@ import { styled } from '@mui/material/styles';
 import { RichTreeView } from '@mui/x-tree-view/RichTreeView';
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem';
 import FiberManualRecordTwoToneIcon from '@mui/icons-material/FiberManualRecordTwoTone';
+import { useCallback } from 'react';
 
-const MUI_X_PRODUCTS = [
-    {
-        id: 'grid',
-        label: 'Data Grid',
-        children: [
-            { id: 'grid-community', label: '@mui/x-data-grid' },
-            { id: 'grid-pro', label: '@mui/x-data-grid-pro' },
-            {
-                id: 'grid-premium', label: '@mui/x-data-grid-premium', children: [
-                    { id: '11grid-community', label: '11@mui/x-data-grid' },
-                    { id: '22grid-pro', label: '22@mui/x-data-grid-pro' },
-                    { id: '33grid-premium', label: '33@mui/x-data-grid-premium' },
-                ]
-            },
-        ],
-    },
-    {
-        id: 'pickers',
-        label: 'Date and Time Pickers',
-        children: [
-            { id: 'pickers-community', label: '@mui/x-date-pickers' },
-            { id: 'pickers-pro', label: '@mui/x-date-pickers-pro' },
-        ],
-    },
-    {
-        id: 'charts',
-        label: 'Charts',
-        children: [{ id: 'charts-community', label: '@mui/x-charts' }],
-    },
-    {
-        id: 'tree-view',
-        label: 'Tree View',
-        children: [{ id: 'tree-view-community', label: '@mui/x-tree-view' }],
-    },
-];
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import TextField from '@mui/material/TextField';
 
 const CustomTreeItem = styled(TreeItem)({
     [`& .${treeItemClasses.iconContainer}`]: {
@@ -53,24 +27,135 @@ const CustomTreeItem = styled(TreeItem)({
     },
 });
 
-// function CloseSquare(props) {
-//   return (
-//     <SvgIcon
-//       className="close"
-//       fontSize="inherit"
-//       style={{ width: 14, height: 14 }}
-//       {...props}
-//     >
-//       {/* tslint:disable-next-line: max-line-length */}
-//       <path d="M17.485 17.512q-.281.281-.682.281t-.696-.268l-4.12-4.147-4.12 4.147q-.294.268-.696.268t-.682-.281-.281-.682.294-.669l4.12-4.147-4.12-4.147q-.294-.268-.294-.669t.281-.682.682-.281.696 .268l4.12 4.147 4.12-4.147q.294-.268.696-.268t.682.281 .281.669-.294.682l-4.12 4.147 4.12 4.147q.294.268 .294.669t-.281.682zM22.047 22.074v0 0-20.147 0h-20.12v0 20.147 0h20.12zM22.047 24h-20.12q-.803 0-1.365-.562t-.562-1.365v-20.147q0-.776.562-1.351t1.365-.575h20.147q.776 0 1.351.575t.575 1.351v20.147q0 .803-.575 1.365t-1.378.562v0z" />
-//     </SvgIcon>
-//   );
-// }
+const DimensionMembers = (props) => {
 
-export default function CustomIcons(props) {
+    const [membersTree, setMembersTree] = useState([]);
+    const [parentMemberGid, setParentMemberGid] = useState('');
+    const [openDialog, setOpenDialog] = useState(false);  // 控制Dialog的显示
+    const [newMemberName, setNewMemberName] = useState('');  // 记录新成员的名称
+
+    const load_members_by_hierarchy = async (hierarchy) => {
+        try {
+            const response = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
+            if (response.data.success) {
+                return response.data.members;
+            }
+        } catch (error) {
+            console.error('Error fetching in Fn:DimensionMembers()', error);
+        }
+        return [];
+    };
+
+    // 获取维度所有的hierarchies
+    const load_hierarchies = useCallback(async () => {
+        try {
+            const response = await axios.get(`${config.metaServerBaseURL}/api/dimension/${props.dimensionGid}/hierarchies`);
+            if (response.data.success) {
+                // console.log("response.data.hierarchies >>>>>>>>>>>>>>>>>", response.data.hierarchies);
+                const hierarchies = response.data.hierarchies;
+
+                const tree = [];
+
+                for (let hierarchy of hierarchies) {
+
+                    hierarchy.id = '' + hierarchy.gid;
+                    hierarchy.label = hierarchy.name;
+                    hierarchy.children = [];
+
+                    let members = await load_members_by_hierarchy(hierarchy);
+
+                    let tempMapping = {};
+
+                    for (let m of members) {
+                        m.id = '' + m.gid;
+                        m.label = m.name;
+                        m.children = [];
+
+                        tempMapping[m.id] = m;
+                    }
+
+                    for (let m of members) {
+                        if (m.parentGid > 0) { // 非根节点
+                            let parent = tempMapping[m.parentGid];
+                            parent.children.push(m);
+                        } else { // 根节点
+                            hierarchy.children.push(m);
+                        }
+                    }
+
+                    tree.push(hierarchy);
+                    // console.log("@@@members >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", members);
+                }
+
+                setMembersTree(tree);
+            }
+        } catch (error) {
+            console.error('Error fetching in Fn:load_hierarchies()', error);
+        }
+    }, [props.dimensionGid]);
+
+    // 初始化时加载数据
+    useEffect(() => {
+        load_hierarchies();
+    }, [load_hierarchies]);
+
+    // 处理TreeItem选择事件
+    const handleSelectMember = (event, parent_member_gid_str) => {
+        // console.log("handleSelectMember $$$$$$$$$$$$$$$>>>>>>>>>>>>>>>", event, parent_member_gid_str);
+        setParentMemberGid(parent_member_gid_str);
+    };
+
+    // 打开Dialog
+    const handleOpenDialog = () => {
+        // console.log("handleOpenDialog $$$$$$$$$$$$$$$> ooooooooo (((((((((( ))))))))))))))))))", parentMemberGid);
+        setOpenDialog(true);
+    };
+
+    // 关闭Dialog
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+        setNewMemberName('');
+    };
+
+    // 提交创建新成员
+    const handleCreateMember = async () => {
+        // console.log("parentMemberGid, newMemberName [][] ", parentMemberGid, newMemberName);
+        // if (!selectedMember || !newMemberName.trim()) return;
+        if (!newMemberName.trim()) {
+            return;
+        }
+
+        try {
+            await axios.post(`${config.metaServerBaseURL}/api/child-member`, {
+                newChildMemberName: newMemberName,
+                parentGid: parentMemberGid,
+            });
+
+            // 成功创建后刷新成员树
+            setNewMemberName('');
+            setParentMemberGid('');
+            handleCloseDialog();
+            // 调用 load_hierarchies 来刷新树
+            load_hierarchies();
+        } catch (error) {
+            console.error('Error creating new member', error);
+        }
+    };
+
     return (
         <Box sx={{ minHeight: 352, minWidth: 250 }}>
-            <h1>Dimension GID: {props.dimensionGid}</h1>
+
+            {/* 创建按钮 */}
+            <Button 
+                variant="contained" 
+                onClick={handleOpenDialog} 
+                disabled={parentMemberGid.charAt(0) !== '3'}  // 只有选中成员时可用
+                sx={{ marginBottom: 2 }}
+            >
+                创建
+            </Button>
+
+            {/* Dimension GID is {props.dimensionGid} */}
             <RichTreeView
                 // defaultExpandedItems={['grid']}
                 slots={{
@@ -79,8 +164,30 @@ export default function CustomIcons(props) {
                     endIcon: FiberManualRecordTwoToneIcon,
                     item: CustomTreeItem,
                 }}
-                items={MUI_X_PRODUCTS}
+                items={membersTree}
+                onItemClick={handleSelectMember}  // 监听节点选择
             />
+
+            {/* 创建新成员的Dialog */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>创建子级成员</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="子级成员名称"
+                        fullWidth
+                        value={newMemberName}
+                        onChange={(e) => setNewMemberName(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog}>取消</Button>
+                    <Button onClick={handleCreateMember} variant="contained">创建</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
-}
+};
+
+export default DimensionMembers;
