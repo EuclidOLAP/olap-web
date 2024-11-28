@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import AdHocQuery from './ad_hoc_query';
 import Typography from '@mui/material/Typography';
 import AdHocCatalog from './ad_hoc_catalog';
@@ -24,12 +24,14 @@ export default function ScrollableTabsButtonAuto() {
         setValue(newValue);
     };
 
-    const handleAddTab = () => {
+    const handleAddTab = ({ cube_id, query_uuid }) => {
         const newId = tabs.length + 1;
         const newTab = {
             id: newId,
-            label: `Tab ${newId}`,
+            label: `new query ${query_uuid.substring(0, 4)}`,
             data: { queryId: newId }, // 传入不同的数据
+            cube_id,
+            query_uuid
         };
         setTabs((prevTabs) => [...prevTabs, newTab]);
         setValue(tabs.length); // 设置为新建 Tab 的索引
@@ -89,7 +91,11 @@ export default function ScrollableTabsButtonAuto() {
                         display: value === index ? 'block' : 'none', // 只显示选中的 Box
                     }}
                 >
-                    {tab.key === 'ADHOC_CATALOG' ? (<AdHocCatalog />) : (<AdHocQuery data={tab.data} />)}
+                    {
+                        tab.key === 'ADHOC_CATALOG'
+                            ? (<AdHocCatalog createNewAdHocQuery={handleAddTab} />)
+                            : (<AdHocQuery data={{ cube_id: tab.cube_id, query_uuid: tab.query_uuid }} />)
+                    }
                 </Box>
             ))}
         </Box>

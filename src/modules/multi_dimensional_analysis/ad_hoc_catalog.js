@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Card, CardContent, CardActions, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
 import AddIcon from '@mui/icons-material/Add';
 import QueryIcon from '@mui/icons-material/QueryBuilder';
 import CubeIcon from '@mui/icons-material/ViewInAr';
 import axios from 'axios';
 import config from '../../config';
 
-const AdHocCatalog = () => {
+const AdHocCatalog = ({ createNewAdHocQuery }) => {
     const [cubes, setCubes] = useState([]);
 
     // 模拟数据
@@ -42,7 +43,10 @@ const AdHocCatalog = () => {
     }, []);
 
     const handleCreateQuery = (cubeId) => {
-        console.log(`Create a new query for Cube ID: ${cubeId}`);
+        createNewAdHocQuery({
+            cube_id: cubeId,
+            query_uuid: uuidv4(),
+        });
     };
 
     return (
