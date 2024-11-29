@@ -1,15 +1,41 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import config from '../../config';
 
 export default function UploadMeta() {
     // 状态存储 textarea 的内容
     const [text, setText] = useState("");
 
-    const inputDimension = () => {
-        console.log('inputDimension');
+    const inputDimension = async () => {
+        console.log('>>>>>>>>>>>>>>>>>>>>> inputDimension >>>>>>>>>>>>>>>>>>>>>');
+
+        let lines = text.trim().split('\n').map(line => line.trim());
+
+        const dimension = lines[0];
+        console.log("dimension: " + dimension);
+
+        const levels = lines[1].split('\t');
+        console.log("levels: " + levels);
+
+        lines = lines.slice(2);
+        for (let member_path of lines) {
+            member_path = member_path.split('\t');
+            console.log("member_path: " + member_path);
+        }
+
+        const response = await axios.post(`${config.metaServerBaseURL}/api/dimension`, {
+            name: dimension,
+            defaultHierarchyName: dimension,
+            levels: levels
+        });
+
+        console.log("XXX new dim XXX", response);
+
     };
 
     const buildCube = () => {
-        console.log('buildCube');
+        console.log('>>>>>>>>>>>>>>>>>>>>> buildCube >>>>>>>>>>>>>>>>>>>>>');
+        console.log(text);
     };
 
     return (
