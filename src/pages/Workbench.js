@@ -10,6 +10,7 @@ import PivotTableChartIcon from '@mui/icons-material/PivotTableChart';
 import HomeIcon from '@mui/icons-material/Home';
 import GridViewIcon from '@mui/icons-material/GridView';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import StarPurple500Icon from '@mui/icons-material/StarPurple500';
 import { AppProvider } from '@toolpad/core/AppProvider';
 import { DashboardLayout } from '@toolpad/core/DashboardLayout';
@@ -21,6 +22,7 @@ import AdHoc from '../modules/multi_dimensional_analysis/ad_hoc';
 import DataVisualization from '../modules/multi_dimensional_analysis/data_visualization';
 import Dimension from '../modules/multi_dimensional_model_management/dimension';
 import CubeDimensionMatrix from '../modules/multi_dimensional_model_management/CubeDimensionMatrix';
+import UploadMeta from '../modules/multi_dimensional_model_management/UploadMeta';
 
 const NAVIGATION = [
     {
@@ -42,6 +44,11 @@ const NAVIGATION = [
                 segment: 'cube_dimension_matrix',
                 title: '模型概览',
                 icon: <ViewInArIcon />,
+            },
+            {
+                segment: 'UploadMeta',
+                title: '导入模型',
+                icon: <UploadFileIcon />,
             },
         ],
     },
@@ -137,6 +144,8 @@ function DashboardLayoutBasic(props) {
                             return <Dimension />;
                         case '/multi_dimensional_model_management/cube_dimension_matrix':
                             return <CubeDimensionMatrix />;
+                        case '/multi_dimensional_model_management/UploadMeta':
+                            return <UploadMeta />;
                         case '/multi_dimensional_analysis/ad_hoc':
                             return <AdHoc />;
                         case '/multi_dimensional_analysis/data_visualization':
