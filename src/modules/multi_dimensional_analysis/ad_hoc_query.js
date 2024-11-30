@@ -182,6 +182,12 @@ const AdHocQuery = ({ data }) => {
             setQueryUuid(data.query_uuid);
         };
         fetchData(); // Call the async function
+
+        // 清理函数，在组件卸载时执行
+        return () => {
+            console.log(`AdHocQuery组件已卸载 data.cube_id [ ${data.cube_id} ] data.query_uuid [ ${data.query_uuid} ]`);
+            // 其他需要卸载时执行的逻辑...
+        };
     }, [data.cube_id, data.query_uuid]);
 
     return (

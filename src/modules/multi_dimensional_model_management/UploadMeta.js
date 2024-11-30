@@ -17,16 +17,41 @@ export default function UploadMeta() {
         const levels = lines[1].split('\t');
         console.log("levels: " + levels);
 
+        const membersTree = [];
+        const mapping = {};
+
         lines = lines.slice(2);
         for (let member_path of lines) {
             member_path = member_path.split('\t');
-            console.log("member_path: " + member_path);
+            let parent_path = `[${dimension}].[DEF H].[Root]`;
+            for (const [index, fragment] of member_path.entries()) {
+                let path = parent_path + `.[${fragment}]`;
+                if (index === 0) {
+                    if (!mapping[path]) {
+                        mapping[path] = {
+                            fragment,
+                            children: []
+                        };
+                        membersTree.push(mapping[path]);
+                    }
+                } else {
+                    if (!mapping[path]) {
+                        mapping[path] = {
+                            fragment,
+                            children: []
+                        };
+                        mapping[parent_path].children.push(mapping[path]);
+                    }
+                }
+                parent_path = path;
+            }
         }
 
         const response = await axios.post(`${config.metaServerBaseURL}/api/dimension`, {
             name: dimension,
             defaultHierarchyName: dimension,
-            levels: levels
+            levels: levels,
+            membersTree
         });
 
         console.log("XXX new dim XXX", response);
