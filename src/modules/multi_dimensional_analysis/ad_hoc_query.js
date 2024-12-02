@@ -29,6 +29,8 @@ const multiDimResults = [
     ['M91', 'N92', 'O93', 'P94', 'Q95', 'R96', 'S97', 'T98', 'U99', 'V100']
 ];
 
+const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
+
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
 
 const AdHocQuery = ({ data }) => {
@@ -62,7 +64,8 @@ const AdHocQuery = ({ data }) => {
     const CubeOutlineTree = ({ cube, initialTree }) => {
         // 从 localStorage 获取树的展开/合并状态
         const getSavedTreeState = () => {
-            const savedState = localStorage.getItem(queryUuid);
+            // const savedState = localStorage.getItem(queryUuid);
+            const savedState = ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP[queryUuid];
             return savedState ? JSON.parse(savedState) : initialTree;
         };
 
@@ -105,7 +108,8 @@ const AdHocQuery = ({ data }) => {
                                         return;
                                     const updatedTree = toggleNodeVisibility(tree, node.itemId); // 更新树状态
                                     setTree(updatedTree); // 更新组件状态
-                                    localStorage.setItem(queryUuid, JSON.stringify(updatedTree)); // 保持状态到 localStorage
+                                    ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP[queryUuid] = JSON.stringify(updatedTree); // 更新状态缓存
+                                    // localStorage.setItem(queryUuid, JSON.stringify(updatedTree)); // 保持状态到 localStorage
                                 }}
                                 sx={{ marginLeft: `${margin_left}px` }}
                             >
@@ -185,8 +189,14 @@ const AdHocQuery = ({ data }) => {
 
         // 清理函数，在组件卸载时执行
         return () => {
-            console.log(`AdHocQuery组件已卸载 data.cube_id [ ${data.cube_id} ] data.query_uuid [ ${data.query_uuid} ]`);
+            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            console.log(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP);
+            Reflect.deleteProperty(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP, data.query_uuid);
+            console.log("\n\n\n\nADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP\n\n\n\n");
+            // console.log(`AdHocQuery组件已卸载 data.cube_id [ ${data.cube_id} ] data.query_uuid [ ${data.query_uuid} ]`);
             // 其他需要卸载时执行的逻辑...
+            console.log(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP);
+            console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         };
     }, [data.cube_id, data.query_uuid]);
 
