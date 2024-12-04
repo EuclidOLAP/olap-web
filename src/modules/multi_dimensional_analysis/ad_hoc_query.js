@@ -20,24 +20,27 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
-const multiDimResults = [
-    ['A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9', 'J10'],
-    ['K11', 'L12', 'M13', 'N14', 'O15', 'P16', 'Q17', 'R18', 'S19', 'T20'],
-    ['U21', 'V22', 'W23', 'X24', 'Y25', 'Z26', 'A27', 'B28', 'C29', 'D30'],
-    ['S71', 'T72', 'U73', 'V74', 'W75', 'X76', 'Y77', 'Z78', 'A79', 'B80'],
-    ['C81', 'D82', 'E83', 'F84', 'G85', 'H86', 'I87', 'J88', 'K89', 'L90'],
-    ['M91', 'N92', 'O93', 'P94', 'Q95', 'R96', 'S97', 'T98', 'U99', 'V100']
-];
-
 const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
+
+class OlapQueryTableStruct {
+    constructor() {
+        this.rowsStruct = null;
+        this.colsStruct = null;
+        this.table = [
+            ['⟳', 'COLUMNS'],
+            ['ROWS', '<measures>']
+        ];
+    }
+}
 
 const AdHocQuery = ({ data }) => {
 
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct());
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -242,10 +245,11 @@ const AdHocQuery = ({ data }) => {
                         sx={{
                             width: '100%',            // 宽度占满父容器
                             flexGrow: 1,              // 占据剩余的空间
+                            padding: '15px',          // 内边距10px
                         }}
                     >
                         <TableContainer component={Paper}>
-                            <MultidimensionalResultTable resultTable={multiDimResults} />
+                            <MultidimensionalResultTable resultTable={olapTableStruct.table} />
                         </TableContainer>
                     </Box>
                 </Box>
