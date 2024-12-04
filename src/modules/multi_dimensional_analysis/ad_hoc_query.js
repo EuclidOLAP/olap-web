@@ -189,14 +189,8 @@ const AdHocQuery = ({ data }) => {
 
         // 清理函数，在组件卸载时执行
         return () => {
-            console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-            console.log(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP);
+            // 卸载时执行的逻辑
             Reflect.deleteProperty(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP, data.query_uuid);
-            console.log("\n\n\n\nADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP\n\n\n\n");
-            // console.log(`AdHocQuery组件已卸载 data.cube_id [ ${data.cube_id} ] data.query_uuid [ ${data.query_uuid} ]`);
-            // 其他需要卸载时执行的逻辑...
-            console.log(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP);
-            console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         };
     }, [data.cube_id, data.query_uuid]);
 
@@ -215,6 +209,7 @@ const AdHocQuery = ({ data }) => {
                         minWidth: '320px',        // 最小宽度320px
                         maxWidth: '460px',        // 最大宽度460px
                         height: '100%',           // 高度占满父容器
+                        overflow: 'auto',         // 内容溢出时显示滚动条
                         backgroundColor: '#f1f1f1',  // 背景色设置为灰色
                     }}
                 >
