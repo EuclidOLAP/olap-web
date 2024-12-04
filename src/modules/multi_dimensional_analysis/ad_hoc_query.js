@@ -150,7 +150,7 @@ const AdHocQuery = ({ data }) => {
 
 
         return (
-            <TableCell ref={drop}>{cell}</TableCell>
+            <TableCell ref={drop} sx={{ border: '1px solid grey' }}>{cell}</TableCell>
         );
     };
 
