@@ -50,7 +50,7 @@ const AdHocQuery = ({ data }) => {
         }));
 
         return (
-            <Box ref={drag} sx={{ flex: 1, display: 'flex' }}>
+            <Box ref={ element.objType === 'MemberRole' ? drag : null } sx={{ flex: 1, display: 'flex' }}>
                 {/* 中间的图标 */}
                 <Box>
                     {icon}
