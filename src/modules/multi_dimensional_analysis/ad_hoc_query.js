@@ -29,8 +29,8 @@ class OlapQueryTableStruct {
         this.rowsStruct = null;
         this.colsStruct = null;
         this.table = [
-            ['⟳', 'COLUMNS'],
-            ['ROWS', '<measures>']
+            [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
+            [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
         ];
     }
 }
@@ -144,14 +144,16 @@ const AdHocQuery = ({ data }) => {
             accept: DRAGGABLE_NODE_TYPE,
             drop: (element) => {
                 // todo
-                console.log("// todo: drop > drop", element);
+                console.log(">>> Drop at position: ", cell.position);
+                console.log("// todo: drop > drop ", element);
             },
         }));
 
-
-        return (
-            <TableCell ref={drop} sx={{ border: '1px solid grey' }}>{cell}</TableCell>
-        );
+        if (cell.position === 'rows' || cell.position === 'columns') {
+            return (<TableCell ref={drop} sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
+        } else {
+            return (<TableCell            sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
+        }
     };
 
     const MultidimensionalResultTableRow = ({ row }) => {
