@@ -20,22 +20,177 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
-const multiDimResults = [
-    ['A1', 'B2', 'C3', 'D4', 'E5', 'F6', 'G7', 'H8', 'I9', 'J10'],
-    ['K11', 'L12', 'M13', 'N14', 'O15', 'P16', 'Q17', 'R18', 'S19', 'T20'],
-    ['U21', 'V22', 'W23', 'X24', 'Y25', 'Z26', 'A27', 'B28', 'C29', 'D30'],
-    ['S71', 'T72', 'U73', 'V74', 'W75', 'X76', 'Y77', 'Z78', 'A79', 'B80'],
-    ['C81', 'D82', 'E83', 'F84', 'G85', 'H86', 'I87', 'J88', 'K89', 'L90'],
-    ['M91', 'N92', 'O93', 'P94', 'Q95', 'R96', 'S97', 'T98', 'U99', 'V100']
-];
+const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
+
+function createArray(width, height) {
+    const result = [];
+
+    for (let i = 0; i < height; i++) {
+        const row = [];
+        for (let j = 0; j < width; j++) {
+            row.push({ display: '...', position: '0' });
+        }
+        result.push(row);
+    }
+
+    return result;
+}
+
+function generateCartesianProduct(param_arr) {
+    // 计算笛卡尔积
+    const product = param_arr.reduce((acc, curr) => {
+        const newAcc = [];
+        acc.forEach(accItem => {
+            curr.forEach(currItem => {
+                newAcc.push([...accItem, currItem]);
+            });
+        });
+        return newAcc.length === 0 ? curr.map(item => [item]) : newAcc;
+    }, [[]]);
+
+    // 获取生成的二维数组的宽度和高度
+    const height = product.length; // 新数组的行数
+    const width = product[0].length; // 新数组的列数
+
+    return {
+        array: product,
+        width,
+        height
+    };
+}
+
+function rotateMatrix(matrix) {
+    const height = matrix.length;
+    const width = matrix[0].length;
+
+    // 创建一个新的矩阵，用于存储旋转后的结果
+    const rotatedMatrix = new Array(width);
+    for (let i = 0; i < width; i++) {
+        rotatedMatrix[i] = new Array(height);
+    }
+
+    // 旋转矩阵
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            // rotatedMatrix[j][height - i - 1] = matrix[i][j];
+            rotatedMatrix[j][i] = matrix[i][j];
+        }
+    }
+
+    return {
+        matrix: rotatedMatrix,
+        matrix_w: height,
+        matrix_h: width
+    };
+}
+
+class OlapQueryTableStruct {
+    constructor() {
+        this.rowsDimensionsRoles = [];
+        this.colsDimensionsRoles = [];
+
+        this.rowsStruct = [];
+        this.colsStruct = [];
+
+        this.table = [
+            [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
+            [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
+        ];
+    }
+
+    redrawTable() {
+
+        let row_w = this.rowsStruct.length;
+        let row_h = row_w ? 1 : 0;
+        for (const _1d_arr of this.rowsStruct) {
+            row_h *= _1d_arr.length;
+        }
+
+        let col_h = this.colsStruct.length;
+        let col_w = col_h ? 1 : 0;
+        for (const _1d_arr of this.colsStruct) {
+            col_w *= _1d_arr.length;
+        }
+
+        if (row_w === 0 && col_h === 0) {
+            this.table = [
+                [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
+                [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
+            ];
+        } else if (row_w !== 0 && col_h === 0) {
+            this.table = createArray(row_w + 1, row_h + 1);
+        } else if (row_w === 0 && col_h !== 0) {
+            this.table = createArray(col_w + 1, col_h + 1);
+        } else { // row_w !== 0 && col_h !== 0
+            this.table = createArray(row_w + col_w, row_h + col_h);
+        }
+
+        const row_top_offset = col_h ? col_h : 1;
+        const col_left_offset = row_w ? row_w : 1;
+
+        if (row_w) {
+            const { array, width, height } = generateCartesianProduct(this.rowsStruct);
+
+            for (let h = 0; h < height; h++) {
+                for (let w = 0; w < width; w++) {
+                    this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
+                }
+            }
+
+        } else {
+            this.table[row_top_offset][0] = { display: 'ROWS', position: 'rows' };
+        }
+
+        if (col_h) {
+            const { array, width, height } = generateCartesianProduct(this.colsStruct);
+
+            const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
+            for (let h = 0; h < matrix_h; h++) {
+                for (let w = 0; w < matrix_w; w++) {
+                    this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
+                }
+            }
+        } else {
+            this.table[0][col_left_offset] = { display: 'COLUMNS', position: 'columns' };
+        }
+
+    }
+
+    dropMDMInstanceRole(position, instance) {
+        if (instance.objType === 'MemberRole') {
+            this.dropMemberRole(position, instance, instance.obj);
+        }
+    }
+
+    dropMemberRole(position, instance, memberRole) {
+        let rc_struct = position === 'rows' ? this.rowsStruct : this.colsStruct;
+        let dimenison_roles = position === 'rows' ? this.rowsDimensionsRoles : this.colsDimensionsRoles;
+
+        let dr_index = -1;
+
+        for (const [index, dimensionRole] of dimenison_roles.entries()) {
+            if (dimensionRole.gid === memberRole.dimensionRole.gid)
+                dr_index = index;
+        }
+
+        if (dr_index === -1) {
+            dimenison_roles.push(memberRole.dimensionRole);
+            rc_struct.push([memberRole]);
+        } else {
+            rc_struct[dr_index].push(memberRole);
+        }
+
+    }
+}
 
 const AdHocQuery = ({ data }) => {
 
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct());
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -45,7 +200,7 @@ const AdHocQuery = ({ data }) => {
         }));
 
         return (
-            <Box ref={drag} sx={{ flex: 1, display: 'flex' }}>
+            <Box ref={element.objType === 'MemberRole' ? drag : null} sx={{ flex: 1, display: 'flex' }}>
                 {/* 中间的图标 */}
                 <Box>
                     {icon}
@@ -62,7 +217,8 @@ const AdHocQuery = ({ data }) => {
     const CubeOutlineTree = ({ cube, initialTree }) => {
         // 从 localStorage 获取树的展开/合并状态
         const getSavedTreeState = () => {
-            const savedState = localStorage.getItem(queryUuid);
+            // const savedState = localStorage.getItem(queryUuid);
+            const savedState = ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP[queryUuid];
             return savedState ? JSON.parse(savedState) : initialTree;
         };
 
@@ -105,7 +261,8 @@ const AdHocQuery = ({ data }) => {
                                         return;
                                     const updatedTree = toggleNodeVisibility(tree, node.itemId); // 更新树状态
                                     setTree(updatedTree); // 更新组件状态
-                                    localStorage.setItem(queryUuid, JSON.stringify(updatedTree)); // 保持状态到 localStorage
+                                    ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP[queryUuid] = JSON.stringify(updatedTree); // 更新状态缓存
+                                    // localStorage.setItem(queryUuid, JSON.stringify(updatedTree)); // 保持状态到 localStorage
                                 }}
                                 sx={{ marginLeft: `${margin_left}px` }}
                             >
@@ -136,15 +293,22 @@ const AdHocQuery = ({ data }) => {
         const [, drop] = useDrop(() => ({
             accept: DRAGGABLE_NODE_TYPE,
             drop: (element) => {
-                // todo
-                console.log("// todo: drop > drop", element);
+                olapTableStruct.dropMDMInstanceRole(cell.position, element);
+
+                olapTableStruct.redrawTable();
+
+                let new_ots = new OlapQueryTableStruct();
+                Object.assign(new_ots, olapTableStruct);
+
+                setOlapTableStruct(new_ots);
             },
         }));
 
-
-        return (
-            <TableCell ref={drop}>{cell}</TableCell>
-        );
+        if (cell.position === 'rows' || cell.position === 'columns') {
+            return (<TableCell sx={{ border: '1px solid grey' }} ref={drop}>{cell.display}</TableCell>);
+        } else {
+            return (<TableCell sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
+        }
     };
 
     const MultidimensionalResultTableRow = ({ row }) => {
@@ -182,6 +346,12 @@ const AdHocQuery = ({ data }) => {
             setQueryUuid(data.query_uuid);
         };
         fetchData(); // Call the async function
+
+        // 清理函数，在组件卸载时执行
+        return () => {
+            // 卸载时执行的逻辑
+            Reflect.deleteProperty(ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP, data.query_uuid);
+        };
     }, [data.cube_id, data.query_uuid]);
 
     return (
@@ -199,6 +369,7 @@ const AdHocQuery = ({ data }) => {
                         minWidth: '320px',        // 最小宽度320px
                         maxWidth: '460px',        // 最大宽度460px
                         height: '100%',           // 高度占满父容器
+                        overflow: 'auto',         // 内容溢出时显示滚动条
                         backgroundColor: '#f1f1f1',  // 背景色设置为灰色
                     }}
                 >
@@ -231,10 +402,11 @@ const AdHocQuery = ({ data }) => {
                         sx={{
                             width: '100%',            // 宽度占满父容器
                             flexGrow: 1,              // 占据剩余的空间
+                            padding: '15px',          // 内边距10px
                         }}
                     >
                         <TableContainer component={Paper}>
-                            <MultidimensionalResultTable resultTable={multiDimResults} />
+                            <MultidimensionalResultTable resultTable={olapTableStruct.table} />
                         </TableContainer>
                     </Box>
                 </Box>
