@@ -26,12 +26,46 @@ const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
 
 class OlapQueryTableStruct {
     constructor() {
-        this.rowsStruct = null;
-        this.colsStruct = null;
+        this.rowsDimensionsRoles = [];
+        this.colsDimensionsRoles = [];
+
+        this.rowsStruct = [];
+        this.colsStruct = [];
+
         this.table = [
             [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
             [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
         ];
+    }
+
+    dropMDMInstanceRole(position, instance) {
+        if (instance.objType === 'MemberRole') {
+            this.dropMemberRole(position, instance, instance.obj);
+        }
+    }
+
+    dropMemberRole(position, instance, memberRole) {
+        let rc_struct = position === 'rows' ? this.rowsStruct : this.colsStruct;
+        let dimenison_roles = position === 'rows' ? this.rowsDimensionsRoles : this.colsDimensionsRoles;
+
+        let dr_index = -1;
+
+        for (const [index, dimensionRole] of dimenison_roles.entries()) {
+            if (dimensionRole.gid === memberRole.dimensionRole.gid)
+                dr_index = index;
+        }
+
+        if (dr_index === -1) {
+            dimenison_roles.push(memberRole.dimensionRole);
+            rc_struct.push([memberRole]);
+        } else {
+            rc_struct[dr_index].push(memberRole);
+        }
+
+        console.log('this.rowsDimensionsRoles ::: ', this.rowsDimensionsRoles);
+        console.log('this.rowsStruct :::::::::::: ', this.rowsStruct);
+        console.log('this.colsDimensionsRoles ::: ', this.colsDimensionsRoles);
+        console.log('this.colsStruct :::::::::::: ', this.colsStruct);
     }
 }
 
@@ -50,7 +84,7 @@ const AdHocQuery = ({ data }) => {
         }));
 
         return (
-            <Box ref={ element.objType === 'MemberRole' ? drag : null } sx={{ flex: 1, display: 'flex' }}>
+            <Box ref={element.objType === 'MemberRole' ? drag : null} sx={{ flex: 1, display: 'flex' }}>
                 {/* 中间的图标 */}
                 <Box>
                     {icon}
@@ -143,16 +177,14 @@ const AdHocQuery = ({ data }) => {
         const [, drop] = useDrop(() => ({
             accept: DRAGGABLE_NODE_TYPE,
             drop: (element) => {
-                // todo
-                console.log(">>> Drop at position: ", cell.position);
-                console.log("// todo: drop > drop ", element);
+                olapTableStruct.dropMDMInstanceRole(cell.position, element);
             },
         }));
 
         if (cell.position === 'rows' || cell.position === 'columns') {
-            return (<TableCell ref={drop} sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
+            return (<TableCell sx={{ border: '1px solid grey' }} ref={drop}>{cell.display}</TableCell>);
         } else {
-            return (<TableCell            sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
+            return (<TableCell sx={{ border: '1px solid grey' }}>{cell.display}</TableCell>);
         }
     };
 
