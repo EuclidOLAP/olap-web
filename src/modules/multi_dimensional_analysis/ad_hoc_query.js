@@ -24,6 +24,68 @@ const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
 
+function createArray(width, height) {
+    const result = [];
+
+    for (let i = 0; i < height; i++) {
+        const row = [];
+        for (let j = 0; j < width; j++) {
+            row.push({ display: '...', position: '0' });
+        }
+        result.push(row);
+    }
+
+    return result;
+}
+
+function generateCartesianProduct(param_arr) {
+    // 计算笛卡尔积
+    const product = param_arr.reduce((acc, curr) => {
+        const newAcc = [];
+        acc.forEach(accItem => {
+            curr.forEach(currItem => {
+                newAcc.push([...accItem, currItem]);
+            });
+        });
+        return newAcc.length === 0 ? curr.map(item => [item]) : newAcc;
+    }, [[]]);
+
+    // 获取生成的二维数组的宽度和高度
+    const height = product.length; // 新数组的行数
+    const width = product[0].length; // 新数组的列数
+
+    return {
+        array: product,
+        width,
+        height
+    };
+}
+
+function rotateMatrix(matrix) {
+    const height = matrix.length;
+    const width = matrix[0].length;
+
+    // 创建一个新的矩阵，用于存储旋转后的结果
+    const rotatedMatrix = new Array(width);
+    for (let i = 0; i < width; i++) {
+        rotatedMatrix[i] = new Array(height);
+    }
+
+    // 旋转矩阵
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < width; j++) {
+            // rotatedMatrix[j][height - i - 1] = matrix[i][j];
+            rotatedMatrix[j][i] = matrix[i][j];
+        }
+    }
+
+    return {
+        matrix: rotatedMatrix,
+        matrix_w: height,
+        matrix_h: width
+    };
+}
+
 class OlapQueryTableStruct {
     constructor() {
         this.rowsDimensionsRoles = [];
@@ -36,6 +98,64 @@ class OlapQueryTableStruct {
             [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
             [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
         ];
+    }
+
+    redrawTable() {
+
+        let row_w = this.rowsStruct.length;
+        let row_h = row_w ? 1 : 0;
+        for (const _1d_arr of this.rowsStruct) {
+            row_h *= _1d_arr.length;
+        }
+
+        let col_h = this.colsStruct.length;
+        let col_w = col_h ? 1 : 0;
+        for (const _1d_arr of this.colsStruct) {
+            col_w *= _1d_arr.length;
+        }
+
+        if (row_w === 0 && col_h === 0) {
+            this.table = [
+                [{ display: '⟳', position: 'pivot' }, { display: 'COLUMNS', position: 'columns' }],
+                [{ display: 'ROWS', position: 'rows' }, { display: '<measures>', position: 'measures' }],
+            ];
+        } else if (row_w !== 0 && col_h === 0) {
+            this.table = createArray(row_w + 1, row_h + 1);
+        } else if (row_w === 0 && col_h !== 0) {
+            this.table = createArray(col_w + 1, col_h + 1);
+        } else { // row_w !== 0 && col_h !== 0
+            this.table = createArray(row_w + col_w, row_h + col_h);
+        }
+
+        const row_top_offset = col_h ? col_h : 1;
+        const col_left_offset = row_w ? row_w : 1;
+
+        if (row_w) {
+            const { array, width, height } = generateCartesianProduct(this.rowsStruct);
+
+            for (let h = 0; h < height; h++) {
+                for (let w = 0; w < width; w++) {
+                    this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
+                }
+            }
+
+        } else {
+            this.table[row_top_offset][0] = { display: 'ROWS', position: 'rows' };
+        }
+
+        if (col_h) {
+            const { array, width, height } = generateCartesianProduct(this.colsStruct);
+
+            const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
+            for (let h = 0; h < matrix_h; h++) {
+                for (let w = 0; w < matrix_w; w++) {
+                    this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
+                }
+            }
+        } else {
+            this.table[0][col_left_offset] = { display: 'COLUMNS', position: 'columns' };
+        }
+
     }
 
     dropMDMInstanceRole(position, instance) {
@@ -62,10 +182,6 @@ class OlapQueryTableStruct {
             rc_struct[dr_index].push(memberRole);
         }
 
-        console.log('this.rowsDimensionsRoles ::: ', this.rowsDimensionsRoles);
-        console.log('this.rowsStruct :::::::::::: ', this.rowsStruct);
-        console.log('this.colsDimensionsRoles ::: ', this.colsDimensionsRoles);
-        console.log('this.colsStruct :::::::::::: ', this.colsStruct);
     }
 }
 
@@ -178,6 +294,13 @@ const AdHocQuery = ({ data }) => {
             accept: DRAGGABLE_NODE_TYPE,
             drop: (element) => {
                 olapTableStruct.dropMDMInstanceRole(cell.position, element);
+
+                olapTableStruct.redrawTable();
+
+                let new_ots = new OlapQueryTableStruct();
+                Object.assign(new_ots, olapTableStruct);
+
+                setOlapTableStruct(new_ots);
             },
         }));
 
