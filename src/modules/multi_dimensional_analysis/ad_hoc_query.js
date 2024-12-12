@@ -20,6 +20,8 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
+import MdmInstanceTypes from '../../functions/constants';
+
 const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
@@ -131,11 +133,13 @@ class OlapQueryTableStruct {
         const col_left_offset = row_w ? row_w : 1;
 
         if (row_w) {
+            console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.rowsStruct);
 
             for (let h = 0; h < height; h++) {
                 for (let w = 0; w < width; w++) {
                     this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
+                    console.log(`table[${h + row_top_offset}][${w}]\t\t${array[h][w].member.name} >>> `, array[h][w]);
                 }
             }
 
@@ -144,22 +148,31 @@ class OlapQueryTableStruct {
         }
 
         if (col_h) {
+            console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.colsStruct);
 
             const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
             for (let h = 0; h < matrix_h; h++) {
                 for (let w = 0; w < matrix_w; w++) {
                     this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
+                    console.log(`table[${h}][${w + col_left_offset}]\t\t${matrix[h][w].member.name} >>> `, matrix[h][w]);
                 }
             }
         } else {
             this.table[0][col_left_offset] = { display: 'COLUMNS', position: 'columns' };
         }
 
+        // 到此为止，table 已经生成完毕，rows和columns位置上应该显示的多维模型对象实例（目前只是MemberRole）已经确定
+        // 接下来要拼装MDX，并调用后端的API接口进行查询
+
+        console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+
+        
+
     }
 
     dropMDMInstanceRole(position, instance) {
-        if (instance.objType === 'MemberRole') {
+        if (instance.objType === MdmInstanceTypes.MEMBER_ROLE) {
             this.dropMemberRole(position, instance, instance.obj);
         }
     }
@@ -200,7 +213,7 @@ const AdHocQuery = ({ data }) => {
         }));
 
         return (
-            <Box ref={element.objType === 'MemberRole' ? drag : null} sx={{ flex: 1, display: 'flex' }}>
+            <Box ref={element.objType === MdmInstanceTypes.MEMBER_ROLE ? drag : null} sx={{ flex: 1, display: 'flex' }}>
                 {/* 中间的图标 */}
                 <Box>
                     {icon}
@@ -242,11 +255,11 @@ const AdHocQuery = ({ data }) => {
             return nodes.map(node => {
                 let margin_left = 0; // default node.objType is 'DimensionRole'
                 let icon = <NorthEastIcon />;
-                if (node.objType === 'HierarchyRole') {
+                if (node.objType === MdmInstanceTypes.HIERARCHY_ROLE) {
                     margin_left = 20;
                     icon = <DehazeIcon />;
                 }
-                if (node.objType === 'MemberRole') {
+                if (node.objType === MdmInstanceTypes.MEMBER_ROLE) {
                     margin_left = 20 + (node.obj.member.level + 1) * 20;
                     icon = <PanoramaFishEyeIcon sx={{ fontSize: '16px' }} />;
                 }
