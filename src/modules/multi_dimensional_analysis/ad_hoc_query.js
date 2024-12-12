@@ -149,7 +149,8 @@ class OlapQueryTableStruct {
 
         if (col_h) {
             console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-            const { array, width, height } = generateCartesianProduct(this.colsStruct);
+            // const { array, width, height } = generateCartesianProduct(this.colsStruct);
+            const { array } = generateCartesianProduct(this.colsStruct);
 
             const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
             for (let h = 0; h < matrix_h; h++) {
