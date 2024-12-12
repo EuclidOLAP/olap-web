@@ -417,6 +417,7 @@ const AdHocQuery = ({ data }) => {
                             width: '100%',            // 宽度占满父容器
                             flexGrow: 1,              // 占据剩余的空间
                             padding: '15px',          // 内边距10px
+                            overflow: 'auto',
                         }}
                     >
                         <TableContainer component={Paper}>
