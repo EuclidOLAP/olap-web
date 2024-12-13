@@ -88,6 +88,23 @@ function rotateMatrix(matrix) {
     };
 }
 
+function splice_mdx_set_str(member_roles_info_2d_arr) {
+    const d2_arr = member_roles_info_2d_arr;
+    let set_str = [];
+    for (const tuple_info of d2_arr) {
+        let tuple_str = [];
+        for (const mr of tuple_info) { // mr is a MemberRole object
+            const dr = mr.dimensionRole; // dr is a DimensionRole object
+            const mbr = mr.member; // mbr is a Member object
+            tuple_str.push(`&${dr.gid}[${dr.name}].&${mbr.gid}[${mbr.name}]`);
+        }
+        tuple_str = `( ${tuple_str.join(', ')} )`;
+        set_str.push(tuple_str);
+    }
+    set_str = `{\n${set_str.join(',\n')}\n}`;
+    return set_str;
+}
+
 class OlapQueryTableStruct {
     constructor() {
         this.rowsDimensionsRoles = [];
@@ -132,14 +149,18 @@ class OlapQueryTableStruct {
         const row_top_offset = col_h ? col_h : 1;
         const col_left_offset = row_w ? row_w : 1;
 
+        let rows_mdx_arr = [];
+        let cols_mdx_arr = [];
+
         if (row_w) {
             console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.rowsStruct);
+            rows_mdx_arr = array;
 
             for (let h = 0; h < height; h++) {
                 for (let w = 0; w < width; w++) {
                     this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
-                    console.log(`table[${h + row_top_offset}][${w}]\t\t${array[h][w].member.name} >>> `, array[h][w]);
+                    // console.log(`table[${h + row_top_offset}][${w}]\t\t${array[h][w].member.name} >>> `, array[h][w]);
                 }
             }
 
@@ -151,12 +172,13 @@ class OlapQueryTableStruct {
             console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             // const { array, width, height } = generateCartesianProduct(this.colsStruct);
             const { array } = generateCartesianProduct(this.colsStruct);
+            cols_mdx_arr = array;
 
             const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
             for (let h = 0; h < matrix_h; h++) {
                 for (let w = 0; w < matrix_w; w++) {
                     this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
-                    console.log(`table[${h}][${w + col_left_offset}]\t\t${matrix[h][w].member.name} >>> `, matrix[h][w]);
+                    // console.log(`table[${h}][${w + col_left_offset}]\t\t${matrix[h][w].member.name} >>> `, matrix[h][w]);
                 }
             }
         } else {
@@ -167,8 +189,17 @@ class OlapQueryTableStruct {
         // 接下来要拼装MDX，并调用后端的API接口进行查询
 
         console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        console.log("rows_mdx_arr: ", rows_mdx_arr);
+        console.log("cols_mdx_arr: ", cols_mdx_arr);
 
+        const rows_mdx_str = splice_mdx_set_str(rows_mdx_arr);
+        const cols_mdx_str = splice_mdx_set_str(cols_mdx_arr);
         
+        console.log("rows_mdx_str", rows_mdx_str);
+        console.log("cols_mdx_str", cols_mdx_str);
+
+        // 拼接完整的MDX语句
+        // todo
 
     }
 

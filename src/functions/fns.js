@@ -26,7 +26,7 @@ const Fns = {
                 showChildren: true,
             };
 
-            console.log("@@@ >>> dimension_role_item.obj <<< @@@", dimension_role_item.obj);
+            // console.log("@@@ >>> dimension_role_item.obj <<< @@@", dimension_role_item.obj);
 
             // 加载此维度（角色）下的全部Hierarchies
             let hierarchies = await axios.get(`${config.metaServerBaseURL}/api/dimension/${dr.dimensionGid}/hierarchies`);
@@ -45,7 +45,7 @@ const Fns = {
                     showChildren: false,
                 };
 
-                console.log("@@@ >>> hierarchy_role_item.obj <<< @@@", hierarchy_role_item.obj);
+                // console.log("@@@ >>> hierarchy_role_item.obj <<< @@@", hierarchy_role_item.obj);
 
                 let members = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
                 members = members.data.members;
@@ -64,7 +64,7 @@ const Fns = {
                         showChildren: false,
                     };
 
-                    console.log("@@@ >>> member_role_items_map[member.gid].obj <<< @@@", member_role_items_map[member.gid].obj);
+                    // console.log("@@@ >>> member_role_items_map[member.gid].obj <<< @@@", member_role_items_map[member.gid].obj);
                 }
 
                 for (const member of members) {
