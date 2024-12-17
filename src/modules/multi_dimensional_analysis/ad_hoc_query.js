@@ -22,6 +22,9 @@ import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
 import MdmInstanceTypes from '../../functions/constants';
 
+import config from '../../config';
+import axios from 'axios';
+
 const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
@@ -106,7 +109,10 @@ function splice_mdx_set_str(member_roles_info_2d_arr) {
 }
 
 class OlapQueryTableStruct {
-    constructor() {
+    constructor({cubeGid}) {
+
+        this.cubeGid = cubeGid;
+
         this.rowsDimensionsRoles = [];
         this.colsDimensionsRoles = [];
 
@@ -119,7 +125,7 @@ class OlapQueryTableStruct {
         ];
     }
 
-    redrawTable() {
+    async redrawTable() {
 
         let row_w = this.rowsStruct.length;
         let row_h = row_w ? 1 : 0;
@@ -199,7 +205,12 @@ class OlapQueryTableStruct {
         console.log("cols_mdx_str", cols_mdx_str);
 
         // 拼接完整的MDX语句
-        // todo
+        const mdx = `select\n${rows_mdx_str}\non rows,\n${cols_mdx_str}\non columns\nfrom &${this.cubeGid};`;
+
+        const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
+        console.log("response: ", response);
+
+        // todo 得到查询结果后，更新 table 组件的显示内容
 
     }
 
@@ -235,7 +246,7 @@ const AdHocQuery = ({ data }) => {
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
-    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct());
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({cubeGid:data.cube_id}));
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -342,7 +353,7 @@ const AdHocQuery = ({ data }) => {
 
                 olapTableStruct.redrawTable();
 
-                let new_ots = new OlapQueryTableStruct();
+                let new_ots = new OlapQueryTableStruct({cubeGid:olapTableStruct.cubeGid});
                 Object.assign(new_ots, olapTableStruct);
 
                 setOlapTableStruct(new_ots);
