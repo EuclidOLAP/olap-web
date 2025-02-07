@@ -10,6 +10,7 @@ import PivotTableChartIcon from '@mui/icons-material/PivotTableChart';
 import HomeIcon from '@mui/icons-material/Home';
 import GridViewIcon from '@mui/icons-material/GridView';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
+import DatasetTwoToneIcon from '@mui/icons-material/DatasetTwoTone';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import StarPurple500Icon from '@mui/icons-material/StarPurple500';
 import { AppProvider } from '@toolpad/core/AppProvider';
@@ -18,6 +19,7 @@ import { useDemoRouter } from '@toolpad/core/internal';
 
 import Home from '../modules/home';
 import MetricsManagement from '../modules/metrics_management';
+import DataManagement from '../modules/data_management';
 import AdHoc from '../modules/multi_dimensional_analysis/ad_hoc';
 import DataVisualization from '../modules/multi_dimensional_analysis/data_visualization';
 import Dimension from '../modules/multi_dimensional_model_management/dimension';
@@ -73,6 +75,11 @@ const NAVIGATION = [
         segment: 'metrics_management',
         title: '指标管理',
         icon: <FunctionsIcon />,
+    },
+    {
+        segment: 'data_management',
+        title: '数据管理',
+        icon: <DatasetTwoToneIcon />,
     },
 ];
 
@@ -152,6 +159,8 @@ function DashboardLayoutBasic(props) {
                             return <DataVisualization />;
                         case '/metrics_management':
                             return <MetricsManagement />;
+                        case '/data_management':
+                            return <DataManagement />;
                         default:
                             return <Typography>404 - Page not found</Typography>;  // 默认情况
                     }
