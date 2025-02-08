@@ -17,10 +17,12 @@ const transformCubes = (cubes) => {
 const CardComponent = () => {
     const [cubeCards, setCubeCards] = useState([]);
     const [selectedCube, setSelectedCube] = useState(null); // 选中的 Cube 信息
+    const [selectedCubeCapacity, setSelectedCubeCapacity] = useState(0);
     const [dialogOpen, setDialogOpen] = useState(false); // 控制 Dialog 显示状态
     const [inputValues, setInputValues] = useState({
-        param1: '',
-        param2: ''
+        measurementSize: '',
+        // param1: '',
+        // param2: ''
     });
 
     useEffect(() => {
@@ -37,7 +39,9 @@ const CardComponent = () => {
     }, []);
 
     // 处理按钮点击，打开 Dialog
-    const handleOpenDialog = (cube) => {
+    const handleOpenDialog = async (cube) => {
+        const cube_capacity = await axios.get(`${config.metaServerBaseURL}/api/cube/${cube.gid}/capacity`);
+        setSelectedCubeCapacity(cube_capacity.data.capacity);
         setSelectedCube(cube);
         setDialogOpen(true);
     };
@@ -96,24 +100,27 @@ const CardComponent = () => {
                             <Typography variant="body2" color="textSecondary" paragraph>
                                 GID: {selectedCube.gid}
                             </Typography>
+                            <Typography variant="body2" color="textSecondary" paragraph>
+                                Cube Capacity: {selectedCubeCapacity}
+                            </Typography>
 
                             {/* 输入参数 */}
                             <TextField
-                                label="参数1"
-                                name="param1"
-                                value={inputValues.param1}
+                                label="预期数据量"
+                                name="measurementSize"
+                                value={inputValues.measurementSize}
                                 onChange={handleInputChange}
                                 fullWidth
                                 margin="normal"
                             />
-                            <TextField
+                            {/* <TextField
                                 label="参数2"
                                 name="param2"
                                 value={inputValues.param2}
                                 onChange={handleInputChange}
                                 fullWidth
                                 margin="normal"
-                            />
+                            /> */}
                         </>
                     )}
                 </DialogContent>
