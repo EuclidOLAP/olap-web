@@ -1,5 +1,6 @@
 import config from '../config';
 import axios from 'axios';
+import MdmInstanceTypes from './constants';
 
 const Fns = {
 
@@ -21,9 +22,11 @@ const Fns = {
                 label: dr.name,
                 children: [],
                 obj: dr,
-                objType: 'DimensionRole',
+                objType: MdmInstanceTypes.DIMENSION_ROLE,
                 showChildren: true,
             };
+
+            // console.log("@@@ >>> dimension_role_item.obj <<< @@@", dimension_role_item.obj);
 
             // 加载此维度（角色）下的全部Hierarchies
             let hierarchies = await axios.get(`${config.metaServerBaseURL}/api/dimension/${dr.dimensionGid}/hierarchies`);
@@ -38,9 +41,11 @@ const Fns = {
                         hierarchy,
                         dimensionRole: dr
                     },
-                    objType: 'HierarchyRole',
+                    objType: MdmInstanceTypes.HIERARCHY_ROLE,
                     showChildren: false,
                 };
+
+                // console.log("@@@ >>> hierarchy_role_item.obj <<< @@@", hierarchy_role_item.obj);
 
                 let members = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
                 members = members.data.members;
@@ -55,9 +60,11 @@ const Fns = {
                             hierarchy,
                             dimensionRole: dr
                         },
-                        objType: 'MemberRole',
+                        objType: MdmInstanceTypes.MEMBER_ROLE,
                         showChildren: false,
                     };
+
+                    // console.log("@@@ >>> member_role_items_map[member.gid].obj <<< @@@", member_role_items_map[member.gid].obj);
                 }
 
                 for (const member of members) {

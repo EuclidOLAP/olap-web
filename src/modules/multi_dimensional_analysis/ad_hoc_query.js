@@ -20,6 +20,11 @@ import NorthEastIcon from '@mui/icons-material/NorthEast';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
+import MdmInstanceTypes from '../../functions/constants';
+
+import config from '../../config';
+import axios from 'axios';
+
 const ADHOC_TABS_QUERY_CUBE_STRUCT_TREES_STATUS_MAP = {};
 
 const DRAGGABLE_NODE_TYPE = 'DRAGGABLE_NODE_TYPE';
@@ -86,8 +91,28 @@ function rotateMatrix(matrix) {
     };
 }
 
+function splice_mdx_set_str(member_roles_info_2d_arr) {
+    const d2_arr = member_roles_info_2d_arr;
+    let set_str = [];
+    for (const tuple_info of d2_arr) {
+        let tuple_str = [];
+        for (const mr of tuple_info) { // mr is a MemberRole object
+            const dr = mr.dimensionRole; // dr is a DimensionRole object
+            const mbr = mr.member; // mbr is a Member object
+            tuple_str.push(`&${dr.gid}[${dr.name}].&${mbr.gid}[${mbr.name}]`);
+        }
+        tuple_str = `( ${tuple_str.join(', ')} )`;
+        set_str.push(tuple_str);
+    }
+    set_str = `{\n${set_str.join(',\n')}\n}`;
+    return set_str;
+}
+
 class OlapQueryTableStruct {
-    constructor() {
+    constructor({cubeGid}) {
+
+        this.cubeGid = cubeGid;
+
         this.rowsDimensionsRoles = [];
         this.colsDimensionsRoles = [];
 
@@ -100,7 +125,7 @@ class OlapQueryTableStruct {
         ];
     }
 
-    redrawTable() {
+    async redrawTable() {
 
         let row_w = this.rowsStruct.length;
         let row_h = row_w ? 1 : 0;
@@ -130,12 +155,18 @@ class OlapQueryTableStruct {
         const row_top_offset = col_h ? col_h : 1;
         const col_left_offset = row_w ? row_w : 1;
 
+        let rows_mdx_arr = [];
+        let cols_mdx_arr = [];
+
         if (row_w) {
+            console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.rowsStruct);
+            rows_mdx_arr = array;
 
             for (let h = 0; h < height; h++) {
                 for (let w = 0; w < width; w++) {
                     this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
+                    // console.log(`table[${h + row_top_offset}][${w}]\t\t${array[h][w].member.name} >>> `, array[h][w]);
                 }
             }
 
@@ -144,22 +175,47 @@ class OlapQueryTableStruct {
         }
 
         if (col_h) {
-            const { array, width, height } = generateCartesianProduct(this.colsStruct);
+            console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            // const { array, width, height } = generateCartesianProduct(this.colsStruct);
+            const { array } = generateCartesianProduct(this.colsStruct);
+            cols_mdx_arr = array;
 
             const { matrix, matrix_w, matrix_h } = rotateMatrix(array);
             for (let h = 0; h < matrix_h; h++) {
                 for (let w = 0; w < matrix_w; w++) {
                     this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
+                    // console.log(`table[${h}][${w + col_left_offset}]\t\t${matrix[h][w].member.name} >>> `, matrix[h][w]);
                 }
             }
         } else {
             this.table[0][col_left_offset] = { display: 'COLUMNS', position: 'columns' };
         }
 
+        // 到此为止，table 已经生成完毕，rows和columns位置上应该显示的多维模型对象实例（目前只是MemberRole）已经确定
+        // 接下来要拼装MDX，并调用后端的API接口进行查询
+
+        console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        console.log("rows_mdx_arr: ", rows_mdx_arr);
+        console.log("cols_mdx_arr: ", cols_mdx_arr);
+
+        const rows_mdx_str = splice_mdx_set_str(rows_mdx_arr);
+        const cols_mdx_str = splice_mdx_set_str(cols_mdx_arr);
+        
+        console.log("rows_mdx_str", rows_mdx_str);
+        console.log("cols_mdx_str", cols_mdx_str);
+
+        // 拼接完整的MDX语句
+        const mdx = `select\n${rows_mdx_str}\non rows,\n${cols_mdx_str}\non columns\nfrom &${this.cubeGid};`;
+
+        const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
+        console.log("response: ", response);
+
+        // todo 得到查询结果后，更新 table 组件的显示内容
+
     }
 
     dropMDMInstanceRole(position, instance) {
-        if (instance.objType === 'MemberRole') {
+        if (instance.objType === MdmInstanceTypes.MEMBER_ROLE) {
             this.dropMemberRole(position, instance, instance.obj);
         }
     }
@@ -190,7 +246,7 @@ const AdHocQuery = ({ data }) => {
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
-    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct());
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({cubeGid:data.cube_id}));
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -200,7 +256,7 @@ const AdHocQuery = ({ data }) => {
         }));
 
         return (
-            <Box ref={element.objType === 'MemberRole' ? drag : null} sx={{ flex: 1, display: 'flex' }}>
+            <Box ref={element.objType === MdmInstanceTypes.MEMBER_ROLE ? drag : null} sx={{ flex: 1, display: 'flex' }}>
                 {/* 中间的图标 */}
                 <Box>
                     {icon}
@@ -242,11 +298,11 @@ const AdHocQuery = ({ data }) => {
             return nodes.map(node => {
                 let margin_left = 0; // default node.objType is 'DimensionRole'
                 let icon = <NorthEastIcon />;
-                if (node.objType === 'HierarchyRole') {
+                if (node.objType === MdmInstanceTypes.HIERARCHY_ROLE) {
                     margin_left = 20;
                     icon = <DehazeIcon />;
                 }
-                if (node.objType === 'MemberRole') {
+                if (node.objType === MdmInstanceTypes.MEMBER_ROLE) {
                     margin_left = 20 + (node.obj.member.level + 1) * 20;
                     icon = <PanoramaFishEyeIcon sx={{ fontSize: '16px' }} />;
                 }
@@ -297,7 +353,7 @@ const AdHocQuery = ({ data }) => {
 
                 olapTableStruct.redrawTable();
 
-                let new_ots = new OlapQueryTableStruct();
+                let new_ots = new OlapQueryTableStruct({cubeGid:olapTableStruct.cubeGid});
                 Object.assign(new_ots, olapTableStruct);
 
                 setOlapTableStruct(new_ots);
@@ -403,6 +459,7 @@ const AdHocQuery = ({ data }) => {
                             width: '100%',            // 宽度占满父容器
                             flexGrow: 1,              // 占据剩余的空间
                             padding: '15px',          // 内边距10px
+                            overflow: 'auto',
                         }}
                     >
                         <TableContainer component={Paper}>
