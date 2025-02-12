@@ -58,9 +58,27 @@ const CardComponent = () => {
     };
 
     // 处理执行任务按钮点击
-    const handleExecuteTask = () => {
-        console.log('执行数据生成任务，参数:', inputValues);
-        // 可以在这里调用 API 发送数据
+    const handleExecuteTask = async () => {
+        if (!selectedCube || !inputValues.measurementSize) {
+            console.error("缺少必要参数");
+            return;
+        }
+    
+        const cubeGid = parseInt(selectedCube.gid, 10);
+        const expectedMeasureRecords = parseInt(inputValues.measurementSize, 10);
+    
+        if (isNaN(cubeGid) || isNaN(expectedMeasureRecords)) {
+            console.error("参数转换失败");
+            return;
+        }
+    
+        try {
+            const response = await axios.post(`${config.metaServerBaseURL}/api/cube/${cubeGid}/generate-measures`, { expectedMeasureRecords });
+            console.log("数据生成任务提交成功:", response.data);
+        } catch (error) {
+            console.error("数据生成任务提交失败:", error);
+        }
+    
         handleCloseDialog();
     };
 
