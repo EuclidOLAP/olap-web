@@ -93,6 +93,9 @@ function rotateMatrix(matrix) {
 
 function splice_mdx_set_str(member_roles_info_2d_arr) {
     const d2_arr = member_roles_info_2d_arr;
+    if (d2_arr.length === 0)
+        return null;
+
     let set_str = [];
     for (const tuple_info of d2_arr) {
         let tuple_str = [];
@@ -200,6 +203,9 @@ class OlapQueryTableStruct {
 
         const rows_mdx_str = splice_mdx_set_str(rows_mdx_arr);
         const cols_mdx_str = splice_mdx_set_str(cols_mdx_arr);
+
+        if (rows_mdx_str === null || cols_mdx_str === null)
+            return;
         
         console.log("rows_mdx_str", rows_mdx_str);
         console.log("cols_mdx_str", cols_mdx_str);
