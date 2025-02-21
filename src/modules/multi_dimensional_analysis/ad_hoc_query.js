@@ -153,6 +153,12 @@ class OlapQueryTableStruct {
             this.table = createArray(col_w + 1, col_h + 1);
         } else { // row_w !== 0 && col_h !== 0
             this.table = createArray(row_w + col_w, row_h + col_h);
+            let vector_index = 0;
+            for (let r = 0; r < row_h; r++) {
+                for (let c = 0; c < col_w; c++) {
+                    this.table[r + col_h][c + row_w].vector_index = vector_index++;
+                }
+            }
         }
 
         const row_top_offset = col_h ? col_h : 1;
@@ -216,8 +222,16 @@ class OlapQueryTableStruct {
         const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
         console.log("response: ", response);
 
-        // todo 得到查询结果后，更新 table 组件的显示内容
-
+        // 得到查询结果后，更新 table 组件的显示内容
+        const vectors = response.data;
+        for (const row of this.table) {
+            for (const grid of row) {
+                if (!grid.hasOwnProperty('vector_index'))
+                    continue;
+                const vector = vectors[grid.vector_index];
+                grid.display = vector.null_flag ? '' : `${vector.val}`;
+            }
+        }
     }
 
     dropMDMInstanceRole(position, instance) {
@@ -354,10 +368,10 @@ const AdHocQuery = ({ data }) => {
 
         const [, drop] = useDrop(() => ({
             accept: DRAGGABLE_NODE_TYPE,
-            drop: (element) => {
+            drop: async (element) => {
                 olapTableStruct.dropMDMInstanceRole(cell.position, element);
 
-                olapTableStruct.redrawTable();
+                await olapTableStruct.redrawTable();
 
                 let new_ots = new OlapQueryTableStruct({cubeGid:olapTableStruct.cubeGid});
                 Object.assign(new_ots, olapTableStruct);
