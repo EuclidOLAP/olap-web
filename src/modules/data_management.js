@@ -131,14 +131,6 @@ const CardComponent = () => {
                                 fullWidth
                                 margin="normal"
                             />
-                            {/* <TextField
-                                label="参数2"
-                                name="param2"
-                                value={inputValues.param2}
-                                onChange={handleInputChange}
-                                fullWidth
-                                margin="normal"
-                            /> */}
                         </>
                     )}
                 </DialogContent>
