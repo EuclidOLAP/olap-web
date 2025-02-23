@@ -32,6 +32,8 @@ const CardComponent = () => {
 
     const open_cube_metrics_page = async (cube) => {
         console.log(">>>>>>>>>> open_cube_metrics_page", cube);
+        const url = `/cube_metrics?cubeGid=${cube.gid}`;
+        window.open(url, '_blank');
     };
 
     return (
