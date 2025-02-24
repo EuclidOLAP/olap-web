@@ -17,6 +17,10 @@ const CubeMetrics = () => {
     setCubeName(cube_name);
   }, [location.search]);
 
+  const selectedOlapEntity = (olapEntity) => {
+    console.log("Selected OLAP Entity:", olapEntity);
+  };
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Top section with fixed height of 120px */}
@@ -44,7 +48,7 @@ const CubeMetrics = () => {
             overflowY: 'auto', // Allow scrolling if content exceeds the box height
           }}
         >
-          <CubeOutline cubeGid={cubeGid} />
+          <CubeOutline cubeGid={cubeGid} callback_selected_node={selectedOlapEntity} />
         </Box>
 
         {/* Right section occupies remaining space */}

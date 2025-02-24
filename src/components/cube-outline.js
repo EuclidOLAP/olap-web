@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 import MetaApi from '../utils/meta-api';
 
-const CubeOutline = ({ cubeGid }) => {
+const CubeOutline = ({ cubeGid, callback_selected_node }) => {
 
   const [tree, setTree] = useState([]);
 
