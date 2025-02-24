@@ -40,7 +40,8 @@ const CubeMetrics = () => {
             backgroundColor: '#cce7ff', // Light blue color for left section
             padding: '20px',
             boxSizing: 'border-box',
-            overflowY: 'auto', // Allow scrolling if content is large
+            height: `calc(100vh - 120px)`, // Subtract the height of the top section (120px)
+            overflowY: 'auto', // Allow scrolling if content exceeds the box height
           }}
         >
           <CubeOutline cubeGid={cubeGid} />
