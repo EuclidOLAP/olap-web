@@ -58,7 +58,6 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
       } else if (node.type === 'hierarchy_role') {
         const dimensionRole = node.olapEntity.dimensionRole;
         const hierarchy = node.olapEntity.hierarchy;
-        // const response = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
         const members = await MetaApi.load_hierarchy_members(hierarchy.gid);
         const root = members.filter((m) => m.parentGid === 0)[0];
 
@@ -73,6 +72,24 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
           },
           children: [],
         }];
+      } else if (node.type === 'member_role') {
+        const parent_member = node.olapEntity.member;
+        const hierarchy_gid = node.olapEntity.member.hierarchyGid;
+        let members = await MetaApi.load_hierarchy_members(hierarchy_gid);
+        members = members.filter((m) => m.parentGid === parent_member.gid);
+
+        node.children = members.map((m) => ({
+          key: `${node.olapEntity.dimensionRole.gid}_${m.gid}`,
+          state: '[ + ]',
+          display: `[成员角色] ${m.name}`,
+          type: 'member_role',
+          olapEntity: {
+            dimensionRole: node.olapEntity.dimensionRole,
+            member: m,
+          },
+          children: [],
+        }));
+
       }
     } else { // node.state === '[ + ]'
       node.children = [];
