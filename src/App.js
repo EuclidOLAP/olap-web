@@ -5,6 +5,7 @@ import './App.css';
 
 import Workbench from './pages/Workbench';
 import AdHocTabs from './modules/multi_dimensional_analysis/ad_hoc_tabs';
+import CubeMetrics from './modules/cube_metrics';
 
 // 首页组件
 function Home() {
@@ -32,6 +33,8 @@ function App() {
           <Route path="/workbench" element={<Workbench />} />
 
           <Route path="/ad_hoc_tabs" element={<AdHocTabs />} />
+
+          <Route path="/cube_metrics" element={<CubeMetrics />} />
 
         </Routes>
       </div>

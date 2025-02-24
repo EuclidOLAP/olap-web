@@ -63,22 +63,22 @@ const CardComponent = () => {
             console.error("缺少必要参数");
             return;
         }
-    
+
         const cubeGid = parseInt(selectedCube.gid, 10);
         const expectedMeasureRecords = parseInt(inputValues.measurementSize, 10);
-    
+
         if (isNaN(cubeGid) || isNaN(expectedMeasureRecords)) {
             console.error("参数转换失败");
             return;
         }
-    
+
         try {
             const response = await axios.post(`${config.metaServerBaseURL}/api/cube/${cubeGid}/generate-measures`, { expectedMeasureRecords });
             console.log("数据生成任务提交成功:", response.data);
         } catch (error) {
             console.error("数据生成任务提交失败:", error);
         }
-    
+
         handleCloseDialog();
     };
 
@@ -131,14 +131,6 @@ const CardComponent = () => {
                                 fullWidth
                                 margin="normal"
                             />
-                            {/* <TextField
-                                label="参数2"
-                                name="param2"
-                                value={inputValues.param2}
-                                onChange={handleInputChange}
-                                fullWidth
-                                margin="normal"
-                            /> */}
                         </>
                     )}
                 </DialogContent>
