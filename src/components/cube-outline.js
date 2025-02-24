@@ -37,9 +37,47 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
   }, [cubeGid]); // 依赖数组中包含cubeGid，确保每次cubeGid变化时都重新发起请求
 
   // 切换节点展开/闭合状态的函数
-  const toggleNodeState = (node) => {
+  const toggleNodeState = async (node) => {
     node.state = node.state === '[ + ]' ? '[ - ]' : '[ + ]'; // 切换状态
-    console.log(node);  // 打印当前节点
+    if (node.state === '[ - ]') {
+      if (node.type === 'dimension_role') {
+        const dim_role = node.olapEntity;
+        const hierarchies = await MetaApi.load_dim_hierarchies(node.olapEntity.dimensionGid);
+        console.log('hierarchies >>>', hierarchies);
+        node.children = hierarchies.map((hierarchy) => ({
+          key: `${dim_role.gid}_${hierarchy.gid}`,
+          state: '[ + ]',
+          display: `[结构角色] ${hierarchy.name}`,
+          type: 'hierarchy_role',
+          olapEntity: {
+            dimensionRole: dim_role,
+            hierarchy,
+          },
+          children: [],
+        }));
+      } else if (node.type === 'hierarchy_role') {
+        const dimensionRole = node.olapEntity.dimensionRole;
+        const hierarchy = node.olapEntity.hierarchy;
+        // const response = await axios.get(`${config.metaServerBaseURL}/api/hierarchy/${hierarchy.gid}/members`);
+        const members = await MetaApi.load_hierarchy_members(hierarchy.gid);
+        const root = members.filter((m) => m.parentGid === 0)[0];
+
+        node.children = [{
+          key: `${dimensionRole.gid}_${root.gid}`,
+          state: '[ + ]',
+          display: `[成员角色] ${root.name}`,
+          type: 'member_role',
+          olapEntity: {
+            dimensionRole,
+            member: root,
+          },
+          children: [],
+        }];
+      }
+    } else { // node.state === '[ + ]'
+      node.children = [];
+    }
+
     setTree([...tree]); // 更新state以触发重新渲染
   };
 
