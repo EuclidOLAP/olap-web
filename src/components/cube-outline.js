@@ -1,67 +1,54 @@
 /**
  * This is a generic component used to show the cube's outline (dimensions roles tree).
  */
-
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import { useEffect } from 'react';
-// import { useEffect, useState } from 'react';
-
+import { useEffect, useState } from 'react';
 import MetaApi from '../utils/meta-api';
 
 const CubeOutline = ({ cubeGid }) => {
-  // // 设置状态，存储API响应的数据和加载状态
-  // const [data, setData] = useState(null);
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState(null);
+
+  const [tree, setTree] = useState([]);
 
   useEffect(() => {
-    // // 定义API请求的URL，假设使用cubeGid作为查询参数
-    // const apiUrl = `/api/cube/${cubeGid}`;
-
-    // todo 根据cube_gid查询meta-api，获得包括度量在内的全部维度角色。
-    if (cubeGid) {
-      MetaApi.load_cube_dim_roles(cubeGid);
-    }
 
     const data_initialization = async () => {
-      // try {
-      //   const response = await fetch(apiUrl);
-
-      //   // 检查响应是否成功
-      //   if (!response.ok) {
-      //     throw new Error('Network response was not ok');
-      //   }
-
-      //   // 解析JSON数据并更新状态
-      //   const result = await response.json();
-      //   setData(result);
-      // } catch (error) {
-      //   // 捕获并设置错误状态
-      //   setError(error);
-      // } finally {
-      //   // 更新加载状态
-      //   setLoading(false);
-      // }
+      // 根据cube_gid查询meta-api，获得包括度量在内的全部维度角色。
+      if (cubeGid) {
+        const dim_roles = await MetaApi.load_cube_dim_roles(cubeGid);
+        const mapping = dim_roles.map((dr) => ({
+          key: `${dr.gid}`,
+          display: `[维度角色] ${dr.name}`,
+          type: 'dimension_role',
+          olapEntity: dr,
+          children: [],
+        }));
+        setTree(mapping);
+      }
     };
 
-    // 调用fetchData函数
     data_initialization();
+
   }, [cubeGid]); // 依赖数组中包含cubeGid，确保每次cubeGid变化时都重新发起请求
 
-  // // 根据加载状态、数据状态和错误状态渲染不同的内容
-  // if (loading) {
-  //   return <Box sx={{ minHeight: 352, minWidth: 250 }}><h1>Loading...</h1></Box>;
-  // }
-
-  // if (error) {
-  //   return <Box sx={{ minHeight: 352, minWidth: 250 }}><h1>Error: {error.message}</h1></Box>;
-  // }
+  // 递归渲染树形结构的函数
+  const renderTree = (node) => {
+    return (
+      <Box key={node.key} sx={{ paddingLeft: 2 }}>
+        <Box sx={{ textAlign: 'left' }}>{node.display}</Box>
+        {/* 如果有子节点，递归渲染 */}
+        {node.children && node.children.length > 0 && (
+          <Box sx={{ paddingLeft: 2 }}>
+            {node.children.map(renderTree)}
+          </Box>
+        )}
+      </Box>
+    );
+  };
 
   return (
     <Box sx={{ minHeight: 352, minWidth: 250 }}>
-      <h1>Cube Outline {cubeGid}</h1>
-      {/* <pre>{JSON.stringify(data, null, 2)}</pre> 显示从API返回的内容 */}
+      {tree.map(renderTree)}
     </Box>
   );
 };
