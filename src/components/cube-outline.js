@@ -7,6 +7,8 @@ import Box from '@mui/material/Box';
 import { useEffect } from 'react';
 // import { useEffect, useState } from 'react';
 
+import MetaApi from '../utils/meta-api';
+
 const CubeOutline = ({ cubeGid }) => {
   // // 设置状态，存储API响应的数据和加载状态
   // const [data, setData] = useState(null);
@@ -17,8 +19,12 @@ const CubeOutline = ({ cubeGid }) => {
     // // 定义API请求的URL，假设使用cubeGid作为查询参数
     // const apiUrl = `/api/cube/${cubeGid}`;
 
-    // 发起API请求
-    const fetchData = async () => {
+    // todo 根据cube_gid查询meta-api，获得包括度量在内的全部维度角色。
+    if (cubeGid) {
+      MetaApi.load_cube_dim_roles(cubeGid);
+    }
+
+    const data_initialization = async () => {
       // try {
       //   const response = await fetch(apiUrl);
 
@@ -40,7 +46,7 @@ const CubeOutline = ({ cubeGid }) => {
     };
 
     // 调用fetchData函数
-    fetchData();
+    data_initialization();
   }, [cubeGid]); // 依赖数组中包含cubeGid，确保每次cubeGid变化时都重新发起请求
 
   // // 根据加载状态、数据状态和错误状态渲染不同的内容
