@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import { Box, Typography, Paper, Button, Grid } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import CubeOutline from '../components/cube-outline';
 
@@ -19,8 +19,33 @@ const CubeMetrics = () => {
   }, [location.search]);
 
   const selectedOlapEntityNode = (node) => {
-    setSelectedNode(node);  // 更新选中的实体对象
-    console.log("------------------------------>>>>>>>>> olapEntity Nodeeeeeeeee:", node);
+    setSelectedNode(node);
+    console.log('Selected OLAP Entity Node:', node);
+  };
+
+  // 示例操作函数：这些函数会接收选中的节点对象并输出它们
+  const handleAction1 = (node) => {
+    console.log('Action 1 executed with:', node);
+  };
+
+  const handleAction2 = (node) => {
+    console.log('Action 2 executed with:', node);
+  };
+
+  const handleAction3 = (node) => {
+    console.log('Action 3 executed with:', node);
+  };
+
+  const handleAction4 = (node) => {
+    console.log('Action 4 executed with:', node);
+  };
+
+  const handleAction5 = (node) => {
+    console.log('Action 5 executed with:', node);
+  };
+
+  const handleAction6 = (node) => {
+    console.log('Action 6 executed with:', node);
   };
 
   return (
@@ -29,7 +54,7 @@ const CubeMetrics = () => {
       <Box
         sx={{
           height: '120px',
-          backgroundColor: '#f0f0f0', // Light grey color for top section
+          backgroundColor: '#f0f0f0',
           padding: '20px',
           boxSizing: 'border-box',
         }}
@@ -43,11 +68,11 @@ const CubeMetrics = () => {
         <Box
           sx={{
             width: '460px',
-            backgroundColor: '#cce7ff', // Light blue color for left section
+            backgroundColor: '#cce7ff',
             padding: '20px',
             boxSizing: 'border-box',
-            height: `calc(100vh - 120px)`, // Subtract the height of the top section (120px)
-            overflowY: 'auto', // Allow scrolling if content exceeds the box height
+            height: `calc(100vh - 120px)`,
+            overflowY: 'auto',
           }}
         >
           <CubeOutline cubeGid={cubeGid} callback_selected_node={selectedOlapEntityNode} />
@@ -57,7 +82,7 @@ const CubeMetrics = () => {
         <Box
           sx={{
             flex: 1,
-            backgroundColor: '#e2f7e2', // Light green color for right section
+            backgroundColor: '#e2f7e2',
             padding: '20px',
             boxSizing: 'border-box',
             overflowY: 'auto',
@@ -69,13 +94,77 @@ const CubeMetrics = () => {
               <Typography variant="h6">Selected Entity Details</Typography>
               <Typography variant="h5"><strong>display:</strong> {selectedNode.display}</Typography>
               <Typography variant="body1"><strong>Type:</strong> {selectedNode.type}</Typography>
-              {/* 你可以根据实体的不同属性，继续渲染更多详细信息 */}
+              {/* Additional attributes can be displayed here */}
             </Paper>
           ) : (
             <Typography variant="h6" sx={{ marginTop: 2 }}>
               No entity selected.
             </Typography>
           )}
+
+          {/* Buttons for various actions */}
+          <Grid container spacing={2} sx={{ marginTop: 2 }}>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction1(selectedNode)}
+              >
+                Action 1
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction2(selectedNode)}
+              >
+                Action 2
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction3(selectedNode)}
+              >
+                Action 3
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction4(selectedNode)}
+              >
+                Action 4
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction5(selectedNode)}
+              >
+                Action 5
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={!selectedNode}
+                onClick={() => handleAction6(selectedNode)}
+              >
+                Action 6
+              </Button>
+            </Grid>
+          </Grid>
         </Box>
       </Box>
     </Box>
