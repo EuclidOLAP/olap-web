@@ -101,7 +101,7 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
   // 递归渲染树形结构的函数
   const handleNodeClick = (node) => {
     setSelectedNode(node.key);  // 更新选中节点的key
-    callback_selected_node(node.olapEntity);
+    callback_selected_node(node);
   };
 
   const renderTree = (node) => {

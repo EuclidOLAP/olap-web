@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import CubeOutline from '../components/cube-outline';
 
 const CubeMetrics = () => {
   const [cubeGid, setCubeGid] = useState(0);
   const [cubeName, setCubeName] = useState('nothing...');
+  const [selectedNode, setSelectedNode] = useState(null);  // 用于存储选中的实体对象
 
   const location = useLocation();
 
@@ -17,8 +18,9 @@ const CubeMetrics = () => {
     setCubeName(cube_name);
   }, [location.search]);
 
-  const selectedOlapEntity = (olapEntity) => {
-    console.log("Selected OLAP Entity:", olapEntity);
+  const selectedOlapEntityNode = (node) => {
+    setSelectedNode(node);  // 更新选中的实体对象
+    console.log("------------------------------>>>>>>>>> olapEntity Nodeeeeeeeee:", node);
   };
 
   return (
@@ -48,7 +50,7 @@ const CubeMetrics = () => {
             overflowY: 'auto', // Allow scrolling if content exceeds the box height
           }}
         >
-          <CubeOutline cubeGid={cubeGid} callback_selected_node={selectedOlapEntity} />
+          <CubeOutline cubeGid={cubeGid} callback_selected_node={selectedOlapEntityNode} />
         </Box>
 
         {/* Right section occupies remaining space */}
@@ -58,10 +60,22 @@ const CubeMetrics = () => {
             backgroundColor: '#e2f7e2', // Light green color for right section
             padding: '20px',
             boxSizing: 'border-box',
+            overflowY: 'auto',
           }}
         >
-          <Typography variant="h6">Right Section</Typography>
-          <Typography variant="body1">This is the right section which takes up the remaining space.</Typography>
+          {/* Display the selected entity's details */}
+          {selectedNode ? (
+            <Paper sx={{ padding: 2, marginTop: 2 }}>
+              <Typography variant="h6">Selected Entity Details</Typography>
+              <Typography variant="h5"><strong>display:</strong> {selectedNode.display}</Typography>
+              <Typography variant="body1"><strong>Type:</strong> {selectedNode.type}</Typography>
+              {/* 你可以根据实体的不同属性，继续渲染更多详细信息 */}
+            </Paper>
+          ) : (
+            <Typography variant="h6" sx={{ marginTop: 2 }}>
+              No entity selected.
+            </Typography>
+          )}
         </Box>
       </Box>
     </Box>
