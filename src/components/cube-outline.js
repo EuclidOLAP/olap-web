@@ -13,6 +13,7 @@ import MetaApi from '../utils/meta-api';
 const CubeOutline = ({ cubeGid, callback_selected_node }) => {
 
   const [tree, setTree] = useState([]);
+  const [selectedNode, setSelectedNode] = useState(null);  // 新增选中节点的状态
 
   useEffect(() => {
 
@@ -99,7 +100,13 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
   };
 
   // 递归渲染树形结构的函数
+  const handleNodeClick = (node) => {
+    setSelectedNode(node.key);  // 更新选中节点的key
+    callback_selected_node(node.olapEntity);
+  };
+
   const renderTree = (node) => {
+    const isSelected = node.key === selectedNode;  // 判断当前节点是否被选中
     return (
       <Box key={node.key} sx={{ paddingLeft: 2 }}>
         <Box sx={{ textAlign: 'left' }}>
@@ -113,8 +120,13 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
             </span>
             {/* 点击时调用callback_selected_node，并传递当前的olapEntity */}
             <span
-              style={{ cursor: 'pointer', marginLeft: 8 }}
-              onClick={() => callback_selected_node(node.olapEntity)}  // 传递选中的OLAP实体
+              style={{
+                cursor: 'pointer',
+                marginLeft: 8,
+                backgroundColor: isSelected ? '#d3d3d3' : 'transparent',  // 设置选中节点的背景色
+                padding: '2px 4px', // 增加一些内边距，使背景色更明显
+              }}
+              onClick={() => handleNodeClick(node)}  // 点击节点时更新选中状态
             >
               {node.display}
             </span>
