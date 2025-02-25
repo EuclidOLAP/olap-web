@@ -44,7 +44,6 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
       if (node.type === 'dimension_role') {
         const dim_role = node.olapEntity;
         const hierarchies = await MetaApi.load_dim_hierarchies(node.olapEntity.dimensionGid);
-        console.log('hierarchies >>>', hierarchies);
         node.children = hierarchies.map((hierarchy) => ({
           key: `${dim_role.gid}_${hierarchy.gid}`,
           state: '[ + ]',
