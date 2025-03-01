@@ -22,6 +22,8 @@ import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
 import MdmInstanceTypes from '../../functions/constants';
 
+import CubeOutline from '../../components/cube-outline';
+
 import config from '../../config';
 import axios from 'axios';
 
@@ -112,7 +114,7 @@ function splice_mdx_set_str(member_roles_info_2d_arr) {
 }
 
 class OlapQueryTableStruct {
-    constructor({cubeGid}) {
+    constructor({ cubeGid }) {
 
         this.cubeGid = cubeGid;
 
@@ -212,7 +214,7 @@ class OlapQueryTableStruct {
 
         if (rows_mdx_str === null || cols_mdx_str === null)
             return;
-        
+
         console.log("rows_mdx_str", rows_mdx_str);
         console.log("cols_mdx_str", cols_mdx_str);
 
@@ -266,7 +268,7 @@ const AdHocQuery = ({ data }) => {
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
-    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({cubeGid:data.cube_id}));
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({ cubeGid: data.cube_id }));
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -373,7 +375,7 @@ const AdHocQuery = ({ data }) => {
 
                 await olapTableStruct.redrawTable();
 
-                let new_ots = new OlapQueryTableStruct({cubeGid:olapTableStruct.cubeGid});
+                let new_ots = new OlapQueryTableStruct({ cubeGid: olapTableStruct.cubeGid });
                 Object.assign(new_ots, olapTableStruct);
 
                 setOlapTableStruct(new_ots);
@@ -450,6 +452,22 @@ const AdHocQuery = ({ data }) => {
                     }}
                 >
                     {queryUuid && cube && cubeStructTree && <CubeOutlineTree cube={cube} initialTree={cubeStructTree} />}
+                </Box>
+
+                {/* 中间部分 */}
+                <Box
+                    sx={{
+                        width: 'auto',            // 宽度根据内容自动适应
+                        minWidth: '320px',        // 最小宽度320px
+                        maxWidth: '460px',        // 最大宽度460px
+                        height: '100%',           // 高度占满父容器
+                        overflow: 'auto',         // 内容溢出时显示滚动条
+                        backgroundColor: '#f1f1f1',  // 背景色设置为灰色
+                    }}
+                >
+                    <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
+                        console.log("do nothing ..................", node);
+                    }} />
                 </Box>
 
                 {/* 右边部分 */}
