@@ -465,9 +465,9 @@ const AdHocQuery = ({ data }) => {
                         backgroundColor: '#f1f1f1',  // 背景色设置为灰色
                     }}
                 >
-                    <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
+                    { cube && <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
                         console.log("do nothing ..................", node);
-                    }} />
+                    }} /> }
                 </Box>
 
                 {/* 右边部分 */}
