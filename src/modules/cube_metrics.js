@@ -46,11 +46,11 @@ const CubeMetrics = () => {
 
   const selectedOlapEntityNode = (node) => {
     setSelectedNode(node);
-    console.log('Selected OLAP Entity Node:', node);
+    // console.log('Selected OLAP Entity Node:', node);
   };
 
   const create_new_metric = (node) => {
-    console.log('Action 1 <create_new_metric> executed with:', node);
+    // console.log('Action 1 <create_new_metric> executed with:', node);
     if (node.type === 'dimension_role') {
       alert('Sorry, you cannot create a metric based on a dimension role.\n目前还不能在维度角色下直接创建指标。');
       return;
@@ -103,7 +103,7 @@ const CubeMetrics = () => {
     try {
       // 调用 MetaApi 保存新指标
       const response = await MetaApi.save_calculated_metric(metric_obj);
-      console.log('Saved new metric:', response);
+      console.log('Saved new metric ------------------------ :', response);
 
       // 重新加载数据
       const metrics = await MetaApi.load_cube_calculated_metrics(cubeGid);

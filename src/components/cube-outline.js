@@ -142,7 +142,7 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
     textarea.select();
     try {
       document.execCommand('copy');
-      console.log(`Fallback Copied: ${text}`);
+      // console.log(`Fallback Copied: ${text}`);
     } catch (err) {
       console.error('Fallback copy failed:', err);
     }
