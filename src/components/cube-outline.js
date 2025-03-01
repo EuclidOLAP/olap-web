@@ -44,6 +44,9 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
   // 切换节点展开/闭合状态的函数
   const toggleNodeState = async (node) => {
     node.state = node.state === '[ + ]' ? '[ - ]' : '[ + ]'; // 切换状态
+
+    let metrics = await MetaApi.load_cube_calculated_metrics(cubeGid);
+
     if (node.state === '[ - ]') {
       if (node.type === 'dimension_role') {
         const dim_role = node.olapEntity;
@@ -65,7 +68,17 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
         const members = await MetaApi.load_hierarchy_members(hierarchy.gid);
         const root = members.filter((m) => m.parentGid === 0)[0];
 
-        node.children = [{
+        metrics = metrics.filter((m) => m.dimensionRoleGid === dimensionRole.gid && m.mountPointGid === hierarchy.gid);
+        node.children = metrics.map((metric) => ({
+          key: `${metric.gid}`,
+          state: '[ + ]',
+          display: `* 计算指标 * ${metric.name}`,
+          type:'metric_role',
+          olapEntity: metric,
+          children: [],
+        }));
+
+        node.children.push({
           key: `${dimensionRole.gid}_${root.gid}`,
           state: '[ + ]',
           display: `[成员角色] ${root.name}`,
@@ -75,14 +88,25 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
             member: root,
           },
           children: [],
-        }];
+        });
+
       } else if (node.type === 'member_role') {
         const parent_member = node.olapEntity.member;
         const hierarchy_gid = node.olapEntity.member.hierarchyGid;
         let members = await MetaApi.load_hierarchy_members(hierarchy_gid);
         members = members.filter((m) => m.parentGid === parent_member.gid);
 
-        node.children = members.map((m) => ({
+        metrics = metrics.filter((m) => m.dimensionRoleGid === node.olapEntity.dimensionRole.gid && m.mountPointGid === parent_member.gid);
+        metrics = metrics.map((metric) => ({
+          key: `${metric.gid}`,
+          state: '[ + ]',
+          display: `* 计算指标 * ${metric.name}`,
+          type:'metric_role',
+          olapEntity: metric,
+          children: [],
+        }));
+
+        const members_roles = members.map((m) => ({
           key: `${node.olapEntity.dimensionRole.gid}_${m.gid}`,
           state: '[ + ]',
           display: `[成员角色] ${m.name}`,
@@ -93,6 +117,8 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
           },
           children: [],
         }));
+
+        node.children = [...metrics, ...members_roles];
 
       }
     } else { // node.state === '[ + ]'
