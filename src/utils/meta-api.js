@@ -9,7 +9,7 @@ const load_cube_dim_roles = async (cube_gid) => {
     return dimensionRoles.data.data.filter(role => `${role.cubeGid}` === `${cube_gid}`);
 };
 
-const save_calculated_metric = async (cubeGid, newMetric) => {
+const save_calculated_metric = async (newMetric) => {
     try {
         const response = await axios.post(`${config.metaServerBaseURL}/api/calculated-metrics`, newMetric);
         return response.data;  // 返回保存后的数据（例如返回的新增度量信息）

@@ -102,7 +102,7 @@ const CubeMetrics = () => {
 
     try {
       // 调用 MetaApi 保存新指标
-      const response = await MetaApi.save_calculated_metric(cubeGid, metric_obj);
+      const response = await MetaApi.save_calculated_metric(metric_obj);
       console.log('Saved new metric:', response);
 
       // 重新加载数据
