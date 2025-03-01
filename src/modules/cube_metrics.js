@@ -238,9 +238,9 @@ const CubeMetrics = () => {
                   <TableHead>
                     <TableRow>
                       <TableCell>Name</TableCell>
-                      <TableCell align="right">Code</TableCell>
-                      <TableCell align="right">Alias</TableCell>
-                      <TableCell align="right">Description</TableCell>
+                      {/* <TableCell align="right">Code</TableCell> */}
+                      {/* <TableCell align="right">Alias</TableCell> */}
+                      {/* <TableCell align="right">Description</TableCell> */}
                       <TableCell align="right">Expression</TableCell>
                     </TableRow>
                   </TableHead>
@@ -250,9 +250,9 @@ const CubeMetrics = () => {
                         <TableCell component="th" scope="row">
                           {metric.name}
                         </TableCell>
-                        <TableCell align="right">{metric.code}</TableCell>
-                        <TableCell align="right">{metric.alias}</TableCell>
-                        <TableCell align="right">{metric.description}</TableCell>
+                        {/* <TableCell align="right">{metric.code}</TableCell> */}
+                        {/* <TableCell align="right">{metric.alias}</TableCell> */}
+                        {/* <TableCell align="right">{metric.description}</TableCell> */}
                         <TableCell align="right">{metric.exp}</TableCell>
                       </TableRow>
                     ))}
