@@ -10,6 +10,10 @@ import Box from '@mui/material/Box';
 import { useEffect, useState } from 'react';
 import MetaApi from '../utils/meta-api';
 
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+
 const CubeOutline = ({ cubeGid, callback_selected_node }) => {
 
   const [tree, setTree] = useState([]);
@@ -104,6 +108,47 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
     callback_selected_node(node);
   };
 
+  const copyToClipboard = (node) => {
+
+    const entity = node.olapEntity;
+    let text = '123456.78';
+    if (node.type === 'dimension_role') {
+      text = `&${entity.gid}[${entity.name}]`;
+    } else if (node.type === 'hierarchy_role') {
+      text = `&${entity.dimensionRole.gid}[${entity.dimensionRole.name}].&${entity.hierarchy.gid}[${entity.hierarchy.name}]`;
+    } else if (node.type ==='member_role') {
+      text = `&${entity.dimensionRole.gid}[${entity.dimensionRole.name}].&${entity.member.gid}[${entity.member.name}]`;
+    }
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          console.log(`Copied: ${text}`);
+        })
+        .catch((err) => {
+          console.error('Clipboard copy failed:', err);
+          fallbackCopyText(text);
+        });
+    } else {
+      fallbackCopyText(text);
+    }
+  };
+  
+  // 兼容旧浏览器的复制方法
+  const fallbackCopyText = (text) => {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      document.execCommand('copy');
+      console.log(`Fallback Copied: ${text}`);
+    } catch (err) {
+      console.error('Fallback copy failed:', err);
+    }
+    document.body.removeChild(textarea);
+  };
+
   const renderTree = (node) => {
     const isSelected = node.key === selectedNode;  // 判断当前节点是否被选中
     return (
@@ -129,6 +174,17 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
             >
               {node.display}
             </span>
+
+            {/* 复制按钮 */}
+            <Tooltip title="复制">
+              <IconButton 
+                size="small" 
+                onClick={() => copyToClipboard(node)}
+              >
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+
           </Box>
         </Box>
         {/* 如果有子节点，递归渲染 */}
