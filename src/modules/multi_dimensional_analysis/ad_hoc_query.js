@@ -22,6 +22,8 @@ import PanoramaFishEyeIcon from '@mui/icons-material/PanoramaFishEye';
 
 import MdmInstanceTypes from '../../functions/constants';
 
+import CubeOutline from '../../components/cube-outline';
+
 import config from '../../config';
 import axios from 'axios';
 
@@ -112,7 +114,7 @@ function splice_mdx_set_str(member_roles_info_2d_arr) {
 }
 
 class OlapQueryTableStruct {
-    constructor({cubeGid}) {
+    constructor({ cubeGid }) {
 
         this.cubeGid = cubeGid;
 
@@ -168,7 +170,7 @@ class OlapQueryTableStruct {
         let cols_mdx_arr = [];
 
         if (row_w) {
-            console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            // console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.rowsStruct);
             rows_mdx_arr = array;
 
@@ -184,7 +186,7 @@ class OlapQueryTableStruct {
         }
 
         if (col_h) {
-            console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+            // console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             // const { array, width, height } = generateCartesianProduct(this.colsStruct);
             const { array } = generateCartesianProduct(this.colsStruct);
             cols_mdx_arr = array;
@@ -203,24 +205,24 @@ class OlapQueryTableStruct {
         // 到此为止，table 已经生成完毕，rows和columns位置上应该显示的多维模型对象实例（目前只是MemberRole）已经确定
         // 接下来要拼装MDX，并调用后端的API接口进行查询
 
-        console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        console.log("rows_mdx_arr: ", rows_mdx_arr);
-        console.log("cols_mdx_arr: ", cols_mdx_arr);
+        // console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        // console.log("rows_mdx_arr: ", rows_mdx_arr);
+        // console.log("cols_mdx_arr: ", cols_mdx_arr);
 
         const rows_mdx_str = splice_mdx_set_str(rows_mdx_arr);
         const cols_mdx_str = splice_mdx_set_str(cols_mdx_arr);
 
         if (rows_mdx_str === null || cols_mdx_str === null)
             return;
-        
-        console.log("rows_mdx_str", rows_mdx_str);
-        console.log("cols_mdx_str", cols_mdx_str);
+
+        // console.log("rows_mdx_str", rows_mdx_str);
+        // console.log("cols_mdx_str", cols_mdx_str);
 
         // 拼接完整的MDX语句
         const mdx = `select\n${rows_mdx_str}\non rows,\n${cols_mdx_str}\non columns\nfrom &${this.cubeGid};`;
 
         const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
-        console.log("response: ", response);
+        // console.log("response: ", response);
 
         // 得到查询结果后，更新 table 组件的显示内容
         const vectors = response.data;
@@ -266,7 +268,7 @@ const AdHocQuery = ({ data }) => {
     const [queryUuid, setQueryUuid] = useState(data.query_uuid);
     const [cube, setCube] = useState(null);
     const [cubeStructTree, setCubeStructTree] = useState([]);
-    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({cubeGid:data.cube_id}));
+    const [olapTableStruct, setOlapTableStruct] = useState(new OlapQueryTableStruct({ cubeGid: data.cube_id }));
 
     const DraggableTreeNode = ({ element, icon }) => {
 
@@ -373,7 +375,7 @@ const AdHocQuery = ({ data }) => {
 
                 await olapTableStruct.redrawTable();
 
-                let new_ots = new OlapQueryTableStruct({cubeGid:olapTableStruct.cubeGid});
+                let new_ots = new OlapQueryTableStruct({ cubeGid: olapTableStruct.cubeGid });
                 Object.assign(new_ots, olapTableStruct);
 
                 setOlapTableStruct(new_ots);
@@ -450,6 +452,22 @@ const AdHocQuery = ({ data }) => {
                     }}
                 >
                     {queryUuid && cube && cubeStructTree && <CubeOutlineTree cube={cube} initialTree={cubeStructTree} />}
+                </Box>
+
+                {/* 中间部分 */}
+                <Box
+                    sx={{
+                        width: 'auto',            // 宽度根据内容自动适应
+                        minWidth: '320px',        // 最小宽度320px
+                        maxWidth: '460px',        // 最大宽度460px
+                        height: '100%',           // 高度占满父容器
+                        overflow: 'auto',         // 内容溢出时显示滚动条
+                        backgroundColor: '#f1f1f1',  // 背景色设置为灰色
+                    }}
+                >
+                    { cube && <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
+                        // console.log("do nothing ..................", node);
+                    }} options={{ draggable: true }} /> }
                 </Box>
 
                 {/* 右边部分 */}
