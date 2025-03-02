@@ -467,7 +467,7 @@ const AdHocQuery = ({ data }) => {
                 >
                     { cube && <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
                         console.log("do nothing ..................", node);
-                    }} /> }
+                    }} options={{ draggable: true }} /> }
                 </Box>
 
                 {/* 右边部分 */}

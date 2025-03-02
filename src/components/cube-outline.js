@@ -14,7 +14,21 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 
-const CubeOutline = ({ cubeGid, callback_selected_node }) => {
+import { useDrag } from 'react-dnd';
+
+const DraggableNodeSpan = ({ node }) => {
+  const [, drag] = useDrag(() => ({
+    type: 'DRAGGABLE_NODE_TYPE',
+    item: node,
+  }));
+  return ( <span ref={ drag }>{node.display}</span> );
+};
+
+/**
+ * 
+ * @param options.draggable boolean
+ */
+const CubeOutline = ({ cubeGid, callback_selected_node, options }) => {
 
   const [tree, setTree] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);  // 新增选中节点的状态
@@ -198,7 +212,7 @@ const CubeOutline = ({ cubeGid, callback_selected_node }) => {
               }}
               onClick={() => handleNodeClick(node)}  // 点击节点时更新选中状态
             >
-              {node.display}
+              { options && options.draggable ? <DraggableNodeSpan node={node} /> : node.display }
             </span>
 
             {/* 复制按钮 */}
