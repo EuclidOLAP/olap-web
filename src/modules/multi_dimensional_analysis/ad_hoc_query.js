@@ -448,8 +448,8 @@ const AdHocQuery = ({ data }) => {
                 <Box
                     sx={{
                         width: 'auto',            // 宽度根据内容自动适应
-                        minWidth: '320px',        // 最小宽度320px
-                        maxWidth: '460px',        // 最大宽度460px
+                        minWidth: '120px',        // 最小宽度320px
+                        maxWidth: '200px',        // 最大宽度460px
                         height: '100%',           // 高度占满父容器
                         overflow: 'auto',         // 内容溢出时显示滚动条
                         backgroundColor: '#f1f1f1',  // 背景色设置为灰色
