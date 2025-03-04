@@ -233,7 +233,10 @@ class OlapQueryTableStruct {
 
         if (instance.objType === MdmInstanceTypes.MEMBER_ROLE) {
             this.dropMemberRole(position, instance.obj);
+            return true;
         }
+
+        return false;
     }
 
     dropMemberRole(position, memberRole) {
@@ -364,7 +367,10 @@ const AdHocQuery = ({ data }) => {
         const [, drop] = useDrop(() => ({
             accept: DRAGGABLE_NODE_TYPE,
             drop: async (element) => {
-                olapTableStruct.dropMDMInstanceRole(cell.position, element);
+
+                if (!olapTableStruct.dropMDMInstanceRole(cell.position, element)) {
+                    return;
+                }
 
                 await olapTableStruct.redrawTable();
 
