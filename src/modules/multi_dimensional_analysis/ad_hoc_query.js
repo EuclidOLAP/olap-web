@@ -237,12 +237,17 @@ class OlapQueryTableStruct {
     }
 
     dropMDMInstanceRole(position, instance) {
+        if (instance.type === "member_role") {
+            instance.objType = MdmInstanceTypes.MEMBER_ROLE;
+            instance.obj = instance.olapEntity;
+        }
+
         if (instance.objType === MdmInstanceTypes.MEMBER_ROLE) {
-            this.dropMemberRole(position, instance, instance.obj);
+            this.dropMemberRole(position, instance.obj);
         }
     }
 
-    dropMemberRole(position, instance, memberRole) {
+    dropMemberRole(position, memberRole) {
         let rc_struct = position === 'rows' ? this.rowsStruct : this.colsStruct;
         let dimenison_roles = position === 'rows' ? this.rowsDimensionsRoles : this.colsDimensionsRoles;
 
