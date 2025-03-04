@@ -208,7 +208,9 @@ class OlapQueryTableStruct {
 
         // 拼接完整的MDX语句
         const mdx = `select\n${rows_mdx_str}\non rows,\n${cols_mdx_str}\non columns\nfrom &${this.cubeGid};`;
-
+        console.log(">>>>>> MDX Statement >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+        console.log(mdx);
+        console.log("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
         const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
 
         // 得到查询结果后，更新 table 组件的显示内容
