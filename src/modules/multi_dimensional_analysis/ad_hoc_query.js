@@ -226,13 +226,18 @@ class OlapQueryTableStruct {
     }
 
     dropMDMInstanceRole(position, instance) {
-        if (instance.type === "member_role") {
-            instance.objType = MdmInstanceTypes.MEMBER_ROLE;
-            instance.obj = instance.olapEntity;
-        }
+
+        console.log(`>>>>>>>> dropMDMInstanceRole() >>>>>>>>>>> drop ${instance.type} ${instance.gid} to ${position} >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>`);
+        console.log(instance);
+        console.log("--------------------------------------------------------instance");
 
         if (instance.objType === MdmInstanceTypes.MEMBER_ROLE) {
             this.dropMemberRole(position, instance.obj);
+            return true;
+        }
+        
+        if (instance.type === "member_role") {
+            this.dropMemberRole(position, instance.olapEntity);
             return true;
         }
 
