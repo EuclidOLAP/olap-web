@@ -170,14 +170,12 @@ class OlapQueryTableStruct {
         let cols_mdx_arr = [];
 
         if (row_w) {
-            // console.log(">>> :::ROW::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             const { array, width, height } = generateCartesianProduct(this.rowsStruct);
             rows_mdx_arr = array;
 
             for (let h = 0; h < height; h++) {
                 for (let w = 0; w < width; w++) {
                     this.table[h + row_top_offset][w] = { display: array[h][w].member.name, position: 'rows' };
-                    // console.log(`table[${h + row_top_offset}][${w}]\t\t${array[h][w].member.name} >>> `, array[h][w]);
                 }
             }
 
@@ -186,7 +184,6 @@ class OlapQueryTableStruct {
         }
 
         if (col_h) {
-            // console.log(">>> :::COL::: >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
             // const { array, width, height } = generateCartesianProduct(this.colsStruct);
             const { array } = generateCartesianProduct(this.colsStruct);
             cols_mdx_arr = array;
@@ -195,7 +192,6 @@ class OlapQueryTableStruct {
             for (let h = 0; h < matrix_h; h++) {
                 for (let w = 0; w < matrix_w; w++) {
                     this.table[h][w + col_left_offset] = { display: matrix[h][w].member.name, position: 'columns' };
-                    // console.log(`table[${h}][${w + col_left_offset}]\t\t${matrix[h][w].member.name} >>> `, matrix[h][w]);
                 }
             }
         } else {
@@ -204,25 +200,16 @@ class OlapQueryTableStruct {
 
         // 到此为止，table 已经生成完毕，rows和columns位置上应该显示的多维模型对象实例（目前只是MemberRole）已经确定
         // 接下来要拼装MDX，并调用后端的API接口进行查询
-
-        // console.log(">>> make a mdx query >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-        // console.log("rows_mdx_arr: ", rows_mdx_arr);
-        // console.log("cols_mdx_arr: ", cols_mdx_arr);
-
         const rows_mdx_str = splice_mdx_set_str(rows_mdx_arr);
         const cols_mdx_str = splice_mdx_set_str(cols_mdx_arr);
 
         if (rows_mdx_str === null || cols_mdx_str === null)
             return;
 
-        // console.log("rows_mdx_str", rows_mdx_str);
-        // console.log("cols_mdx_str", cols_mdx_str);
-
         // 拼接完整的MDX语句
         const mdx = `select\n${rows_mdx_str}\non rows,\n${cols_mdx_str}\non columns\nfrom &${this.cubeGid};`;
 
         const response = await axios.post(`${config.metaServerBaseURL}/md-query/mdx`, { mdx });
-        // console.log("response: ", response);
 
         // 得到查询结果后，更新 table 组件的显示内容
         const vectors = response.data;
@@ -264,7 +251,6 @@ class OlapQueryTableStruct {
         } else {
             rc_struct[dr_index].push(memberRole);
         }
-
     }
 }
 
@@ -470,9 +456,9 @@ const AdHocQuery = ({ data }) => {
                         backgroundColor: '#f1f1f1',  // 背景色设置为灰色
                     }}
                 >
-                    { cube && <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
+                    {cube && <CubeOutline cubeGid={cube.gid} callback_selected_node={(node) => {
                         // console.log("do nothing ..................", node);
-                    }} options={{ draggable: true }} /> }
+                    }} options={{ draggable: true }} />}
                 </Box>
 
                 {/* 右边部分 */}
